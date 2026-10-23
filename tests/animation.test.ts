@@ -13,7 +13,7 @@ test('running cycles through eight steps while hurt and death animations end on 
 test('every published actor has all eight directions and stable trim anchors in all animation clips',()=>{
  for(const[key,actor]of Object.entries(actorManifest)){
   const atlas=JSON.parse(readFileSync(new URL('../public/assets/flare/'+actor.atlas,import.meta.url),'utf-8'));
-  const image=readFileSync(new URL('../public/assets/flare/'+actor.file,import.meta.url));const width=image.readUInt32BE(16),height=image.readUInt32BE(20);let sourceSize='';let frames=0;
+  const image=readFileSync(new URL('../public/assets/flare/'+actor.file,import.meta.url));assert.equal(image.subarray(0,4).toString(),'RIFF');assert.equal(image.subarray(8,16).toString(),'WEBPVP8L');assert.equal(image[20],0x2f);const bits=image.readUInt32LE(21),width=(bits&0x3fff)+1,height=((bits>>>14)&0x3fff)+1;assert.deepEqual(atlas.meta.size,{w:width,h:height});let sourceSize='';let frames=0;
   for(const[pose,clip]of Object.entries(actor.clips))for(let dir=0;dir<8;dir++)for(let frame=0;frame<clip.frames;frame++){
    const cell=atlas.frames[`${pose}-${dir}-${frame}`];assert.ok(cell,`${key} ${pose}-${dir}-${frame}`);assert.ok(cell.frame.x+cell.frame.w<=width&&cell.frame.y+cell.frame.h<=height);const size=JSON.stringify(cell.sourceSize);sourceSize||=size;assert.equal(size,sourceSize,'the virtual canvas/ground anchor must stay fixed across every facing and pose');frames++;
   }

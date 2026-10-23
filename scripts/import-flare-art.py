@@ -86,7 +86,7 @@ def make_actor(name,layers,order):
  for key,cut,box,x,y in placements:
   sheet.alpha_composite(cut,(x,y));w,h=cut.size
   frames[key]={'frame':{'x':x,'y':y,'w':w,'h':h},'rotated':False,'trimmed':True,'spriteSourceSize':{'x':box[0],'y':box[1],'w':w,'h':h},'sourceSize':{'w':virtual,'h':virtual}}
- filename=name+'.png';sheet.save(OUT/filename,optimize=True)
+ filename=name+'.webp';sheet.save(OUT/filename,format='WEBP',lossless=True,method=6,exact=True)
  (OUT/(name+'.json')).write_text(json.dumps({'frames':frames,'meta':{'image':filename,'scale':'1','size':{'w':sheet.width,'h':sheet.height}}},separators=(',',':')),encoding='utf-8')
  print(name, 'frames',start,'scale',round(scale,3),'atlas',sheet.size,flush=True)
  for parts in layers.values():

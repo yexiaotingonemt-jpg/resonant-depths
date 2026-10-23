@@ -4,7 +4,7 @@
   "license": "CC-BY-SA-3.0",
   "actors": {
     "ember": {
-      "file": "ember.png",
+      "file": "ember.webp",
       "cell": 160,
       "atlas": "ember.json",
       "anchor": [
@@ -46,7 +46,7 @@
       "frames": 224
     },
     "tide": {
-      "file": "tide.png",
+      "file": "tide.webp",
       "cell": 160,
       "atlas": "tide.json",
       "anchor": [
@@ -88,7 +88,7 @@
       "frames": 224
     },
     "undead": {
-      "file": "undead.png",
+      "file": "undead.webp",
       "cell": 160,
       "atlas": "undead.json",
       "anchor": [
@@ -130,7 +130,7 @@
       "frames": 224
     },
     "cultist": {
-      "file": "cultist.png",
+      "file": "cultist.webp",
       "cell": 160,
       "atlas": "cultist.json",
       "anchor": [
@@ -172,7 +172,7 @@
       "frames": 224
     },
     "brute": {
-      "file": "brute.png",
+      "file": "brute.webp",
       "cell": 160,
       "atlas": "brute.json",
       "anchor": [
@@ -214,7 +214,7 @@
       "frames": 344
     },
     "stalker": {
-      "file": "stalker.png",
+      "file": "stalker.webp",
       "cell": 160,
       "atlas": "stalker.json",
       "anchor": [
@@ -256,7 +256,7 @@
       "frames": 224
     },
     "warden": {
-      "file": "warden.png",
+      "file": "warden.webp",
       "cell": 160,
       "atlas": "warden.json",
       "anchor": [
@@ -298,7 +298,7 @@
       "frames": 224
     },
     "oracle": {
-      "file": "oracle.png",
+      "file": "oracle.webp",
       "cell": 160,
       "atlas": "oracle.json",
       "anchor": [

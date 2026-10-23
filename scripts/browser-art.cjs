@@ -7,7 +7,7 @@ const base=process.env.RESONANT_TEST_URL||'http://127.0.0.1:5178/';
  const browser=await chromium.launch({channel:'chrome',headless:true});
  try{
   const page=await browser.newPage({viewport:{width:1280,height:800}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  let releaseArt;const gate=new Promise(resolve=>releaseArt=resolve);await page.route('**/assets/flare/ember.png',async route=>{await gate;await route.continue();});
+  let releaseArt;const gate=new Promise(resolve=>releaseArt=resolve);await page.route('**/assets/flare/ember.webp',async route=>{await gate;await route.continue();});
   await page.goto(base,{waitUntil:'domcontentloaded'});await page.locator('[data-action="start"]').waitFor();
   assert.equal(await page.locator('[data-action="start"]').isDisabled(),true);assert.equal(await page.locator('.asset-loading').isVisible(),true);releaseArt();
   await page.waitForFunction(()=>window.resonant?.scene.actors.views.size===2);

@@ -17,6 +17,8 @@
 
 `scripts/import-flare-art.py` 从固定版本下载源图及原始帧偏移，按作者提供的方向图层顺序合成人物，并进行透明裁切与图集打包。整套角色使用同一缩放和脚底锚点，避免换方向时抖动或大小变化。没有重新生成或逐帧重画原作品。
 
+运行时使用逐像素核对过的无损 WebP 图集，减少首次下载量；动画帧、色彩与透明通道均保留。
+
 发布文件位于 `public/assets/flare/`，`manifest.json` 记录完整源路径、固定版本 URL 和 SHA-256。原始下载缓存保存在游戏目录之外的 `../scratch/resonant-flare-source/`。运行 `python scripts/import-flare-art.py` 可重建，需要 Pillow。游戏构建和游玩无需 Python。
 
 ## 场景

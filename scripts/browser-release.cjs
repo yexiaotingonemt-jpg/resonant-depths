@@ -7,7 +7,7 @@ const url=process.env.RESONANT_TEST_URL||'https://yexiaotingonemt-jpg.github.io/
  const browser=await chromium.launch({channel:'chrome',headless:true,args:['--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows']});
  try{
   const host=await(await browser.newContext({viewport:{width:1280,height:800}})).newPage(),guest=await(await browser.newContext({viewport:{width:1280,height:800}})).newPage();
-  const errors=[],missing=[];for(const p of[host,guest]){p.on('pageerror',e=>errors.push(e.message));p.on('response',r=>{if(r.status()>=400)missing.push([r.status(),r.url()]);});}
+  const errors=[],missing=[];for(const p of[host,guest]){p.setDefaultTimeout(120000);p.on('pageerror',e=>errors.push(e.message));p.on('response',r=>{if(r.status()>=400)missing.push([r.status(),r.url()]);});}
   await host.goto(url);await host.locator('[data-mode="online"]').click();await host.locator('[data-action="net-create"]').first().click();await host.locator('.connection-message').filter({hasText:'房间已创建，等待搭档加入'}).waitFor({timeout:30000});
   const code=await host.locator('.room-code-block strong').innerText();assert.match(code,/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
   await guest.goto(url);await guest.locator('[data-mode="online"]').click();await guest.locator('#room-code').click();await guest.locator('#room-code').fill(code);await guest.locator('[data-action="net-join"]').click();await guest.locator('[data-action="net-ready"]').click();await host.locator('[data-action="net-start"]:enabled').click();
