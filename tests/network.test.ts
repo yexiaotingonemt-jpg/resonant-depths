@@ -16,3 +16,26 @@ test('a guest cannot restart the run or return the host to lobby',()=>{const a=n
 
 test('network snapshots reject injected methods and arbitrary reward markup',()=>{const w=new World();w.choices=w.offerRelics();const state=capture(w);assert.ok(validSnapshot(state));assert.equal(validSnapshot({...state,togglePause:'override'}),false);assert.equal(validSnapshot({...state,seed:'<img src=x onerror=alert(1)>'}),false);assert.equal(validSnapshot({...state,choices:[{...state.choices[0],name:'<img src=x onerror=alert(1)>'}]}),false);assert.equal(validSnapshot({...state,inventory:['unknown-relic']}),false);});
 test('snapshots include shared combat, revive, loot and final result without simulation methods',()=>{const a=new Authority(new World());a.start(5,'normal');a.world.players[1].down=true;a.world.players[1].revive=1.2;a.world.inventory=['power'];a.world.phase='won';const state=capture(a.world);assert.ok(validSnapshot(state));assert.equal(state.players[1].revive,1.2);assert.deepEqual(state.inventory,['power']);assert.equal(state.phase,'won');assert.equal('update' in state,false);state.players[0].hp=2;assert.equal(a.world.players[0].hp,100);assert.ok(!validSnapshot({...state,players:[]}));assert.ok(!validSnapshot({...state,room:999}));});
+
+test('cooperative windows, enemy rescue targets and barriers survive network snapshots',()=>{
+ const w=new World();w.reset(false,12);w.spawnEnemy('brute',640,300);
+ const e=w.enemies[0];e.mark=3;e.fracture=4;e.taunt=2;w.beginSnare(e,0);
+ w.players[0].barrier=25;w.players[0].barrierTime=5;w.players[1].ultReady=3;
+ w.coop.links=2;w.coop.rescues=1;w.coop.bursts=1;w.coop.last='搭档已破甲';w.coop.lastTime=2;
+ const state=capture(w);assert.ok(validSnapshot(state));assert.deepEqual(state.coop,w.coop);
+ assert.equal(state.enemies[0].snareTarget,0);assert.equal(state.enemies[0].fracture,4);
+ assert.equal(state.players[0].barrier,25);assert.equal(state.players[1].ultReady,3);
+ assert.equal(validSnapshot({...state,coop:undefined}),false);
+ assert.equal(validSnapshot({...state,coop:{...state.coop,links:NaN}}),false);
+ assert.equal(validSnapshot({...state,players:state.players.map(p=>({...p,ultReady:Infinity}))}),false);
+ assert.equal(validSnapshot({...state,enemies:[{...state.enemies[0],snareTarget:8}]}),false);
+});
+
+test('a remote ultimate vote is held until the host independently confirms',()=>{
+ const w=new World(),a=new Authority(w);a.start(4,'normal');w.spawnTimer=100;w.charge=100;
+ a.input(1,{...idle(),ult:true},1000);a.step(1/60,idle(),1001);
+ assert.equal(w.charge,100);assert.ok(w.players[1].ultReady>3);assert.equal(w.players[0].ultReady,0);
+ const state=capture(w);assert.ok(validSnapshot(state));assert.ok(state.players[1].ultReady>3);
+ a.step(1/60,{...idle(),ult:true},1018);assert.equal(w.charge,0);assert.equal(w.ultFlash,.8);
+ assert.ok(w.players.every(p=>p.ultReady===0));
+});

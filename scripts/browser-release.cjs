@@ -12,6 +12,7 @@ const url=process.env.RESONANT_TEST_URL||'https://yexiaotingonemt-jpg.github.io/
   const code=await host.locator('.room-code-block strong').innerText();assert.match(code,/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
   await guest.goto(url);await guest.locator('[data-mode="online"]').click();await guest.locator('#room-code').click();await guest.locator('#room-code').fill(code);await guest.locator('[data-action="net-join"]').click();await guest.locator('[data-action="net-ready"]').click();await host.locator('[data-action="net-start"]:enabled').click();
   await host.locator('.hud').waitFor();await guest.locator('.hud').waitFor();
+  for(const page of[host,guest]){assert.match(await page.locator('.cooperation-sequence').innerText(),/澜施印[\s\S]*烬破甲[\s\S]*澜引爆/);assert.equal(await page.locator('#coop-prompt').isVisible(),true);}
   await guest.keyboard.down('d');await guest.waitForTimeout(500);await guest.keyboard.up('d');await guest.keyboard.press('e');await host.waitForFunction(()=>/[1-9]/.test(document.querySelector('#skill1')?.textContent||''));await guest.waitForFunction(()=>/[1-9]/.test(document.querySelector('#skill1')?.textContent||''));assert.match(await host.locator('#skill1').innerText(),/[1-9]/);assert.match(await guest.locator('#skill1').innerText(),/[1-9]/);
   await fs.mkdir(path.join(__dirname,'../qa'),{recursive:true});await host.screenshot({path:path.join(__dirname,'../qa/release-online.png')});
   await guest.keyboard.press('Escape');await host.locator('[data-action="resume"]').waitFor();await guest.locator('[data-action="resume"]').waitFor();

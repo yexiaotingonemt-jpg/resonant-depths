@@ -1,7 +1,7 @@
 import {World,clamp,idle,type Action} from '../sim';
 import {relics,type Route} from '../data';
 
-export const PROTOCOL=2;
+export const PROTOCOL=3;
 const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export function roomCode(){const values=crypto.getRandomValues(new Uint8Array(8));return Array.from(values,n=>alphabet[n%alphabet.length]).join('');}
 export const normalizeCode=(s:string)=>s.toUpperCase().replace(/[\s-]/g,'');
@@ -14,7 +14,7 @@ export function cleanAction(value:unknown):Action|null{
 }
 export function singleAction(actions:Action[]):Action{const [a=idle(),b=idle()]=actions;return{x:a.x||b.x,y:a.y||b.y,dash:a.dash||b.dash,skill:a.skill||b.skill,ult:a.ult||b.ult};}
 
-const snapshotKeys=['phase','beforePause','players','enemies','bullets','fx','pickups','hazards','room','time','roomTime','wave','waves','charge','ultFlash','link','bossName','seed','kills','dust','combo','bestCombo','revives','ai','difficulty','route','inventory','choices','routes','notice','noticeTime','stats'] as const;
+const snapshotKeys=['phase','beforePause','players','enemies','bullets','fx','pickups','hazards','room','time','roomTime','wave','waves','charge','ultFlash','link','bossName','seed','kills','dust','combo','bestCombo','revives','ai','difficulty','route','inventory','choices','routes','notice','noticeTime','stats','coop'] as const;
 export type Snapshot=Pick<World,typeof snapshotKeys[number]>;
 export function capture(world:World):Snapshot{
  const out:Partial<Snapshot>={};for(const key of snapshotKeys)(out as Record<string,unknown>)[key]=world[key];
@@ -26,6 +26,9 @@ export function validSnapshot(value:unknown):value is Snapshot{
  if(!['seed','kills','dust','revives','charge','combo','bestCombo','roomTime','wave','waves','ultFlash','noticeTime','time'].every(k=>Number.isFinite((s as unknown as Record<string,unknown>)[k])))return false;
  if(!Array.isArray(s.inventory)||!s.inventory.every(id=>relics.some(r=>r.id===id))||!Array.isArray(s.routes)||!s.routes.every(r=>['battle','elite','spring'].includes(r)))return false;
  if(!Array.isArray(s.choices)||!s.choices.every(choice=>{const original=relics.find(r=>r.id===choice?.id);return original&&Object.entries(original).every(([key,v])=>(choice as unknown as Record<string,unknown>)[key]===v);}))return false;
+ if(!s.coop||!['links','rescues','bursts','lastTime'].every(k=>Number.isFinite((s.coop as unknown as Record<string,unknown>)[k]))||typeof s.coop.last!=='string'||s.coop.last.length>160)return false;
+ if(!Array.isArray(s.players)||!s.players.every(p=>p&&[p.barrier,p.barrierTime,p.ultReady].every(n=>Number.isFinite(n)&&n>=0)))return false;
+ if(!Array.isArray(s.enemies)||!s.enemies.every(e=>e&&[e.mark,e.fracture,e.taunt,e.snareTime,e.snareHits].every(n=>Number.isFinite(n)&&n>=0)&&typeof e.guard==='boolean'&&[-1,0,1].includes(e.snareTarget)))return false;
  return ['menu','playing','paused','reward','route','won','lost'].includes(s.phase)&&Number.isFinite(s.time)&&Number.isInteger(s.room)&&s.room>=0&&s.room<=8&&Array.isArray(s.players)&&s.players.length===2&&s.players.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&Number.isFinite(p.hp)&&p.maxHp>0)&&Array.isArray(s.enemies)&&s.enemies.length<500&&Array.isArray(s.bullets)&&s.bullets.length<3000&&Array.isArray(s.fx)&&Array.isArray(s.pickups)&&Array.isArray(s.hazards)&&Array.isArray(s.inventory)&&Array.isArray(s.choices)&&Array.isArray(s.routes)&&!!s.stats;
 }
 export type Command={kind:'pause'|'resume'|'relic'|'route'|'restart'|'retry'|'lobby';epoch:string;value?:string};

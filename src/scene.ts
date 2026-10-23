@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import {World,W,H,distance,type Enemy,type Action} from './sim';
+import {World,W,H,type Enemy,type Action} from './sim';
 import {Input} from './input';
 import {Sound} from './audio';
 import {assets} from './assets';
@@ -22,8 +22,24 @@ export class Arena extends Phaser.Scene {
   const [a,b]=w.players;this.drawLink(a,b,w.link,t);
   for(const h of w.hazards){const progress=1-h.timer/h.duration;g.fillStyle(0xd4759c,.05+progress*.1);g.fillCircle(h.x,h.y,h.r);this.ring(h.x,h.y,h.r,0xef9fbc,.6,1);this.ring(h.x,h.y,h.r*progress,0xef9fbc,.8,2);g.lineStyle(1,0xe6a6bf,.6);g.lineBetween(h.x-10,h.y,h.x+10,h.y);g.lineBetween(h.x,h.y-10,h.x,h.y+10);}
   for(const o of w.pickups){g.fillStyle(0x80dbc5,.12);g.fillCircle(o.x,o.y,10);g.fillStyle(0x9ee8d5,.9);g.fillPoints([{x:o.x,y:o.y-5},{x:o.x+4,y:o.y},{x:o.x,y:o.y+5},{x:o.x-4,y:o.y}],true);}
-  for(const e of w.enemies)this.drawEnemy(e,t);
-  w.players.forEach(p=>{const c=p.id?0x89e0ce:0xf5c77d;g.fillStyle(c,.08);g.fillCircle(p.x,p.y,p.down?40:33);if(p.dashTime>0){p.trail.forEach((q,i)=>{g.fillStyle(c,.25*(1-i/8));g.fillCircle(q.x,q.y,13-i);});}this.drawGuardian('p'+p.id,p.id,p.x,p.y,p.down,p.inv,1);if(p.down){this.ring(p.x,p.y,32,c,.8,2);if(p.revive>0){g.lineStyle(5,0xb6f4d9,.9);g.beginPath();g.arc(p.x,p.y,32,-Math.PI/2,-Math.PI/2+p.revive/2.8*Math.PI*2);g.strokePath();}this.label(p.x,p.y-82,p.revive>0?'救援中':'靠近救援',12,'#b3edda');}else{this.label(p.x,p.y+18,p.id===0?'P1 · 烬':w.ai?'P2 · 澜 / AI':'P2 · 澜',10,p.id?'#a4e4d4':'#f5d18a');if(w.stats.orbit){const ox=p.x+Math.cos(w.time*3+p.id*3)*55,oy=p.y+Math.sin(w.time*3+p.id*3)*55;g.fillStyle(c,1);g.fillCircle(ox,oy,7);this.ring(ox,oy,11,c,.35);}}});
+  for(const e of w.enemies){
+   if(e.snareTarget>=0&&e.snareTime>0){const victim=w.players[e.snareTarget];if(victim){g.lineStyle(8,0xc76ad9,.12);g.lineBetween(e.x,e.y-30,victim.x,victim.y-28);g.lineStyle(2,0xf0a6ff,.85);g.lineBetween(e.x,e.y-30,victim.x,victim.y-28);for(let n=0;n<7;n++){const u=(n/7+t*.25)%1;this.ring(e.x+(victim.x-e.x)*u,e.y-30+(victim.y-e.y+2)*u,4,0xe4a0f8,.9,1);}}}
+   this.drawEnemy(e,t);
+  }
+  w.players.forEach(p=>{
+   const c=p.id?0x89e0ce:0xf5c77d,snare=w.enemies.find(e=>e.snareTarget===p.id&&e.snareTime>0);
+   g.fillStyle(c,.08);g.fillCircle(p.x,p.y,p.down?40:33);
+   if(p.dashTime>0){p.trail.forEach((q,i)=>{g.fillStyle(c,.25*(1-i/8));g.fillCircle(q.x,q.y,13-i);});}
+   this.drawGuardian('p'+p.id,p.id,p.x,p.y,p.down,p.inv,1);
+   if(p.down){this.ring(p.x,p.y,32,c,.8,2);if(p.revive>0){g.lineStyle(5,0xb6f4d9,.9);g.beginPath();g.arc(p.x,p.y,32,-Math.PI/2,-Math.PI/2+p.revive/2.8*Math.PI*2);g.strokePath();}this.label(p.x,p.y-82,p.revive>0?'救援中':'靠近救援',12,'#b3edda');}
+   else{
+    this.label(p.x,p.y+18,p.id===0?'P1 · 烬':w.ai?'P2 · 澜 / AI':'P2 · 澜',10,p.id?'#a4e4d4':'#f5d18a');
+    if(p.barrier>0){g.lineStyle(2,0x96eddf,.55+.15*Math.sin(t*4));g.strokeEllipse(p.x,p.y-30,54,77);g.fillStyle(0x8ee9dc,.04);g.fillEllipse(p.x,p.y-30,54,77);this.label(p.x,p.y+33,'护盾 '+Math.ceil(p.barrier),9,'#a4f0df');}
+    if(snare){this.ring(p.x,p.y,29,0xe39bfc,.9,3);this.label(p.x,p.y-86,`锁魂 ${snare.snareTime.toFixed(1)}s`,12,'#f0b1ff');}
+    else if(p.ultReady>0){this.ring(p.x,p.y,34+Math.sin(t*6)*3,0xffe3a5,.85,2);this.label(p.x,p.y-86,`合击就绪 ${p.ultReady.toFixed(1)}s`,11,'#ffe7a6');}
+    if(w.stats.orbit){const ox=p.x+Math.cos(w.time*3+p.id*3)*55,oy=p.y+Math.sin(w.time*3+p.id*3)*55;g.fillStyle(c,1);g.fillCircle(ox,oy,7);this.ring(ox,oy,11,c,.35);}
+   }
+  });
   for(const b of w.bullets){const c=b.owner<0?0xde8cae:b.owner?0x9cebdc:0xf7cd85;g.lineStyle(b.r*2,c,.18);g.lineBetween(b.x,b.y-28,b.x-b.vx*.035,b.y-28-b.vy*.035);g.fillStyle(c,1);g.fillCircle(b.x,b.y-28,b.r);g.fillStyle(0xffffff,.75);g.fillCircle(b.x-1,b.y-29,b.r*.4);}
   for(const f of w.fx){const a=f.life/f.max,k=1-a;if(f.kind==='text'){this.label(f.x,f.y-45-k*35,f.text||'',f.size,'#f1d8ac',a);continue;}if(f.kind==='ring'||f.kind==='spawn'){this.ring(f.x,f.y,f.size*(f.kind==='spawn'?a:.2+k*.8),f.color,a*.8,2);if(f.kind==='ring'){g.fillStyle(f.color,a*.035);g.fillCircle(f.x,f.y,f.size);}}else for(let i=0;i<8;i++){const angle=i*Math.PI/4,rr=k*f.size;g.fillStyle(f.color,a);g.fillCircle(f.x+Math.cos(angle)*rr,f.y+Math.sin(angle)*rr,Math.max(.5,3*a));}}
   if(w.ultFlash>0){g.fillStyle(0xe8f1c9,w.ultFlash*.2);g.fillRect(0,0,W,H);this.ring(640,415,(.8-w.ultFlash)*1000,0xf7e3a2,w.ultFlash,6);}
@@ -43,7 +59,20 @@ export class Arena extends Phaser.Scene {
   const scale=e.kind==='boss'?1.65:e.kind==='brute'?1.15:e.kind==='dasher'?.7:.8;
   const pose:ActorPose=e.hit>0?'hit':e.windup>0?'cast':e.moving?'run':'stance';
   this.actors.draw('e'+e.id,kinds[e.kind],e.x,e.y,facing8(e.facing),pose,scale,e.hp);
-  if(e.hp<e.maxHp&&e.kind!=='boss'){g.fillStyle(0x191a21,1);g.fillRect(e.x-18,e.y-86*scale,36,3);g.fillStyle(c,.9);g.fillRect(e.x-18,e.y-86*scale,36*Math.max(0,e.hp/e.maxHp),3);}
+  const head=e.y-86*scale;
+  if(e.guard&&e.fracture<=0){this.ring(e.x,e.y,e.r+7,0x99a5b4,.55,3);g.lineStyle(1,0xbed0df,.6);g.strokeTriangle(e.x-7,head-5,e.x+7,head-5,e.x,head+7);}
+  if(e.fracture>0){
+   g.fillStyle(0xf6b76b,.08);g.fillCircle(e.x,e.y,e.r+11);
+   g.lineStyle(3,0xffc983,.9);for(let n=0;n<4;n++){g.beginPath();g.arc(e.x,e.y,e.r+8,n*Math.PI/2+.17,(n+1)*Math.PI/2-.17);g.strokePath();}
+   this.label(e.x,head-12,e.kind==='boss'||e.kind==='brute'?`◇ 破口 ${e.fracture.toFixed(1)}s`:'◇',e.kind==='boss'||e.kind==='brute'?10:16,'#ffd18d');
+  }else if(e.mark>0){
+   g.fillStyle(0x9bf0d9,.18);g.fillCircle(e.x,head-8,11);g.lineStyle(2,0x9bf0d9,1);g.strokePoints([{x:e.x,y:head-15},{x:e.x+6,y:head-8},{x:e.x,y:head-1},{x:e.x-6,y:head-8}],true);
+   if(e.kind==='brute'||e.kind==='boss')this.label(e.x,head-29,'◆ 灵印 · 烬来破甲',10,'#a9f4de');
+  }
+  if(e.taunt>0)this.label(e.x+e.r+9,e.y-34,'↯',15,'#ffd296');
+  if(e.snareTarget>=0&&e.snareTime>0)this.label(e.x,head-45,`锁魂源头 · 还需 ${Math.max(0,3-e.snareHits)} 击`,11,'#efb5ff');
+  if(e.hp<e.maxHp&&e.kind!=='boss'){g.fillStyle(0x191a21,1);g.fillRect(e.x-18,head,36,3);g.fillStyle(c,.9);g.fillRect(e.x-18,head,36*Math.max(0,e.hp/e.maxHp),3);}
+
  }
  label(x:number,y:number,text:string,size:number,color:string,alpha=1){let obj=this.texts[this.textCursor++];if(!obj){obj=this.add.text(x,y,text,{fontFamily:'"Microsoft YaHei", sans-serif',fontSize:size,color,stroke:'#102020',strokeThickness:3}).setOrigin(.5).setDepth(950);this.texts.push(obj);}obj.setPosition(x,y).setText(text).setFontSize(size).setColor(color).setAlpha(alpha).setVisible(true);}
 }
