@@ -1,0 +1,585 @@
+{
+  "source": "FLARE: Empyrean Campaign",
+  "revision": "af6eee6d339ac98011864bfe89da837fe7769c28",
+  "license": "CC-BY-SA-3.0",
+  "actors": {
+    "ember": {
+      "file": "ember.png",
+      "cell": 160,
+      "atlas": "ember.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 4,
+          "duration": 0.8
+        },
+        "run": {
+          "start": 32,
+          "frames": 8,
+          "duration": 0.533
+        },
+        "swing": {
+          "start": 96,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "cast": {
+          "start": 128,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "hit": {
+          "start": 160,
+          "frames": 2,
+          "duration": 0.133
+        },
+        "die": {
+          "start": 176,
+          "frames": 6,
+          "duration": 0.8
+        }
+      },
+      "frames": 224
+    },
+    "tide": {
+      "file": "tide.png",
+      "cell": 160,
+      "atlas": "tide.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 4,
+          "duration": 0.8
+        },
+        "run": {
+          "start": 32,
+          "frames": 8,
+          "duration": 0.533
+        },
+        "swing": {
+          "start": 96,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "cast": {
+          "start": 128,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "hit": {
+          "start": 160,
+          "frames": 2,
+          "duration": 0.133
+        },
+        "die": {
+          "start": 176,
+          "frames": 6,
+          "duration": 0.8
+        }
+      },
+      "frames": 224
+    },
+    "undead": {
+      "file": "undead.png",
+      "cell": 160,
+      "atlas": "undead.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 4,
+          "duration": 0.533
+        },
+        "run": {
+          "start": 32,
+          "frames": 8,
+          "duration": 0.8
+        },
+        "swing": {
+          "start": 96,
+          "frames": 4,
+          "duration": 0.533
+        },
+        "cast": {
+          "start": 128,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "hit": {
+          "start": 160,
+          "frames": 2,
+          "duration": 0.133
+        },
+        "die": {
+          "start": 176,
+          "frames": 6,
+          "duration": 0.4
+        }
+      },
+      "frames": 224
+    },
+    "cultist": {
+      "file": "cultist.png",
+      "cell": 160,
+      "atlas": "cultist.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 4,
+          "duration": 0.533
+        },
+        "run": {
+          "start": 32,
+          "frames": 8,
+          "duration": 0.533
+        },
+        "swing": {
+          "start": 96,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "cast": {
+          "start": 128,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "hit": {
+          "start": 160,
+          "frames": 2,
+          "duration": 0.133
+        },
+        "die": {
+          "start": 176,
+          "frames": 6,
+          "duration": 0.8
+        }
+      },
+      "frames": 224
+    },
+    "brute": {
+      "file": "brute.png",
+      "cell": 160,
+      "atlas": "brute.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 8,
+          "duration": 1.6
+        },
+        "run": {
+          "start": 64,
+          "frames": 8,
+          "duration": 0.533
+        },
+        "swing": {
+          "start": 128,
+          "frames": 8,
+          "duration": 1.066
+        },
+        "cast": {
+          "start": 192,
+          "frames": 8,
+          "duration": 0.8
+        },
+        "hit": {
+          "start": 256,
+          "frames": 3,
+          "duration": 0.2
+        },
+        "die": {
+          "start": 280,
+          "frames": 8,
+          "duration": 1.066
+        }
+      },
+      "frames": 344
+    },
+    "stalker": {
+      "file": "stalker.png",
+      "cell": 160,
+      "atlas": "stalker.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 4,
+          "duration": 0.533
+        },
+        "run": {
+          "start": 32,
+          "frames": 8,
+          "duration": 0.533
+        },
+        "swing": {
+          "start": 96,
+          "frames": 4,
+          "duration": 0.266
+        },
+        "cast": {
+          "start": 128,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "hit": {
+          "start": 160,
+          "frames": 2,
+          "duration": 0.133
+        },
+        "die": {
+          "start": 176,
+          "frames": 6,
+          "duration": 0.8
+        }
+      },
+      "frames": 224
+    },
+    "warden": {
+      "file": "warden.png",
+      "cell": 160,
+      "atlas": "warden.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 4,
+          "duration": 0.533
+        },
+        "run": {
+          "start": 32,
+          "frames": 8,
+          "duration": 0.533
+        },
+        "swing": {
+          "start": 96,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "cast": {
+          "start": 128,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "hit": {
+          "start": 160,
+          "frames": 2,
+          "duration": 0.133
+        },
+        "die": {
+          "start": 176,
+          "frames": 6,
+          "duration": 0.8
+        }
+      },
+      "frames": 224
+    },
+    "oracle": {
+      "file": "oracle.png",
+      "cell": 160,
+      "atlas": "oracle.json",
+      "anchor": [
+        0.5,
+        0.75
+      ],
+      "clips": {
+        "stance": {
+          "start": 0,
+          "frames": 4,
+          "duration": 0.533
+        },
+        "run": {
+          "start": 32,
+          "frames": 8,
+          "duration": 0.533
+        },
+        "swing": {
+          "start": 96,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "cast": {
+          "start": 128,
+          "frames": 4,
+          "duration": 0.4
+        },
+        "hit": {
+          "start": 160,
+          "frames": 2,
+          "duration": 0.133
+        },
+        "die": {
+          "start": 176,
+          "frames": 6,
+          "duration": 0.8
+        }
+      },
+      "frames": 224
+    }
+  },
+  "source_files": [
+    {
+      "path": "CREDITS.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/CREDITS.txt",
+      "sha256": "8b0985009dd04911b851553a35941e6862f1df66a6864f9b2a5c7ff330574fbc"
+    },
+    {
+      "path": "LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/LICENSE.txt",
+      "sha256": "3f941b3b89cf7b8370ceb83cc76d2120d471b58735d8ca60238a751a48d7f72f"
+    },
+    {
+      "path": "README",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/README",
+      "sha256": "00039b58f496f89a97434750c4659fef10455675ccd6c26d238464bfc1850b82"
+    },
+    {
+      "path": "mods/empyrean_campaign/animations/enemies/skeleton_knight_boss.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/empyrean_campaign/animations/enemies/skeleton_knight_boss.txt",
+      "sha256": "c08a673b41f210fab07e6c91b2c6c57403ac8e8f7aa51a60be359dd3b72160cf"
+    },
+    {
+      "path": "mods/empyrean_campaign/animations/enemies/skeleton_mage_high_boss.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/empyrean_campaign/animations/enemies/skeleton_mage_high_boss.txt",
+      "sha256": "51f382d87ff880f2eb9adb72c27ab4e4b7b792fbdfa13353b9c769a702842c3a"
+    },
+    {
+      "path": "mods/empyrean_campaign/images/enemies/skeleton_knight_boss.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/empyrean_campaign/images/enemies/skeleton_knight_boss.png",
+      "sha256": "20f0475f8e1d07851408a3ccbc431a86aedd4c00761d85e8c0eaa360578c0689"
+    },
+    {
+      "path": "mods/empyrean_campaign/images/enemies/skeleton_mage_high_boss.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/empyrean_campaign/images/enemies/skeleton_mage_high_boss.png",
+      "sha256": "e8c30e2eab6f0908015de158b0e984c6fe2a631aeebd2d58f814910413344e9b"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/greatstaff.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/greatstaff.txt",
+      "sha256": "f35962d0bc36f9952778a4b7839c35c443fa27c09784a261be7bc2eb0b8d221f"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/head_short.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/head_short.txt",
+      "sha256": "e7e057ddae7278b25938e48290b38cc16ef63a6d0c4142f12051a5998b2e6362"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/longsword.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/longsword.txt",
+      "sha256": "d0d75f955a2deaae4adad949db0e93cae1d3aae4b1cccdf4110ddc16fbdf0508"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/mage_boots_alt1.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/mage_boots_alt1.txt",
+      "sha256": "2d2bc7173fb8dcafd93cb76f58c70a2486b18574ac6758abab98d4cbc269f062"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/mage_hood_alt1.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/mage_hood_alt1.txt",
+      "sha256": "71bb3efd2b0469277a848fcde630aa8bfe9306f7b726ac3ef1ba10a9da51fd94"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/mage_skirt_alt1.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/mage_skirt_alt1.txt",
+      "sha256": "12c4192aca148da1511cc2cdca568f3d86443b896306b3025ca31a4abe4997f2"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/mage_sleeves_alt1.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/mage_sleeves_alt1.txt",
+      "sha256": "1c05ff23819f4f447d04d1da9c81e9c7171b55ebb28b81401378e8b9b4d1fbf0"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/mage_vest_alt1.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/mage_vest_alt1.txt",
+      "sha256": "30fe10e12e0404df009a0a89d003a2ed7cfcb2aa164e3b9920d4898d62c2ae8c"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/plate_boots.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/plate_boots.txt",
+      "sha256": "894687377ba0117586f8890ba652c273e796c0a755175718dcc9aa14188b541f"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/plate_cuirass.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/plate_cuirass.txt",
+      "sha256": "d82405e8d005ad30c73ab9388826f4b61d02cf4753586f3feb9e62f832db8388"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/plate_gauntlets.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/plate_gauntlets.txt",
+      "sha256": "eafa027686cfc3c6d0a9b26c8da9462294c9e68000a61f21a1dd58d863fbc62e"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/plate_greaves.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/plate_greaves.txt",
+      "sha256": "d4fd9462bcc6446ff79d6b6ca60fd687d210ea9f2a1a35a91b957c9ce89e7603"
+    },
+    {
+      "path": "mods/fantasycore/animations/avatar/male/plate_helm.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/avatar/male/plate_helm.txt",
+      "sha256": "38e4dd0cc73e4c140bbb9c07a29035975ad765cb383ba492e380ed31b9bfd048"
+    },
+    {
+      "path": "mods/fantasycore/animations/enemies/antlion.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/enemies/antlion.txt",
+      "sha256": "6fa4cbb56be6ad43c4d0138b6b271565d7cc283968fe59ed4cc3d7fde744d13f"
+    },
+    {
+      "path": "mods/fantasycore/animations/enemies/minotaur.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/enemies/minotaur.txt",
+      "sha256": "527e3c09ad09b616abf7458c9e61241633e40a6c753ea6a742d77a8a19e0a538"
+    },
+    {
+      "path": "mods/fantasycore/animations/enemies/skeleton_mage.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/enemies/skeleton_mage.txt",
+      "sha256": "b23c03f49224fb8c82776705db99802752e0245129c02ed0c544b8338b7a34b9"
+    },
+    {
+      "path": "mods/fantasycore/animations/enemies/zombie.txt",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/animations/enemies/zombie.txt",
+      "sha256": "5d8d46ca41ef33ac8df179ae2a5ec760fdfa7542254202e22eacbf5db334a619"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/greatstaff.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/greatstaff.png",
+      "sha256": "f4814d1662023301ab9eeb713d44f3f2e41b0a6f292fd13bb6bc1def4dc99640"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/head_short.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/head_short.png",
+      "sha256": "6505e19ae262a2feedbc93fe42466214633a5387b0d4b18a52f182dfb860a655"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/longsword.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/longsword.png",
+      "sha256": "d8544aa5420d19b36d3d555285b0e933803ca0c8f8d168c797021eee3262f7cd"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/mage_boots_alt1.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/mage_boots_alt1.png",
+      "sha256": "731a488eb7327953c8812191850cc0d77e33323992d41089d1db761ebcad964f"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/mage_hood_alt1.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/mage_hood_alt1.png",
+      "sha256": "0e9f08d4c5d5493f6247586a1b056807a7ee1694d294df325253fd753ecc1aac"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/mage_skirt_alt1.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/mage_skirt_alt1.png",
+      "sha256": "3a530d22a70cdefe884852643424b8e8a6bd819affc1aaaf1a0a7c4f47b78f2f"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/mage_sleeves_alt1.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/mage_sleeves_alt1.png",
+      "sha256": "0d0199dfb028290ec4b877b7854be362a68510ce870145dfc234e21dbd451225"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/mage_vest_alt1.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/mage_vest_alt1.png",
+      "sha256": "52c6ab0219cae9f73fe81b7e8cc63e2f57e631828857924e1047a1c99d9100c5"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/plate_boots.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/plate_boots.png",
+      "sha256": "6b271d3be74734b8e7a0eba82f8431b2c63f918414107aee910677e93b20e67e"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/plate_cuirass.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/plate_cuirass.png",
+      "sha256": "f03b991666a5172a8c0e1e198bf1afdea102b388b98094a5f7ad913c82f453cd"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/plate_gauntlets.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/plate_gauntlets.png",
+      "sha256": "3add05fa1d173476af6a23758096fd3800637243ea87769576c1975310a3565d"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/plate_greaves.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/plate_greaves.png",
+      "sha256": "78d881710342ee45f6b0ec19056b224ade411d83321848681d24eeb123c2b7de"
+    },
+    {
+      "path": "mods/fantasycore/images/avatar/male/plate_helm.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/avatar/male/plate_helm.png",
+      "sha256": "7e03dc8a70d958757c738b6181031b58c11118a55069b92dbbf16c69b9f99d20"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/antlion.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/antlion.png",
+      "sha256": "c64d27d5f986a4816ae7471d5a854c95b6952f7205c66b2addc8eb19922fe38b"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_block.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_block.png",
+      "sha256": "116f44dd5a424a7235e30ba678d38b70ac41b74890b78f4d78b625e6899f60b1"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_cast.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_cast.png",
+      "sha256": "4381813e7c06d21581d3d28e26df13284d7ea1ea13987dc1da7e226fe9f1c1f8"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_cast_alt.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_cast_alt.png",
+      "sha256": "05c56c63ec0d8dc28ec104391e04baa2300833ffab4e01f1e44a39dd66ab3eb3"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_die.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_die.png",
+      "sha256": "059b5e661cdc29866eba9352178e4883ade26e0975c916b701fd534dbc107147"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_run.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_run.png",
+      "sha256": "a47df09563ad8f51518c6603610259cdccbac455826927a76323c58242214012"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_shoot.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_shoot.png",
+      "sha256": "b76bcbc3d769664fc7adebf08e4c102fe06c80e618ad307e6fd840703464fa32"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_stance.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_stance.png",
+      "sha256": "3092a0bdb0b8088433c0e42b1fac2dd274addf504484d8a43f482297740c0627"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/minotaur/minotaur_swing.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/minotaur/minotaur_swing.png",
+      "sha256": "4156fffacddaf89f16d25d71643b07faa47a5dcc448ac9f5ee16db2b4ebef488"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/skeleton_mage.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/skeleton_mage.png",
+      "sha256": "f3cffa23fe0fe2dc89e599673207baf58823dd2177a10df1be95d84a52d91237"
+    },
+    {
+      "path": "mods/fantasycore/images/enemies/zombie.png",
+      "url": "https://raw.githubusercontent.com/flareteam/flare-game/af6eee6d339ac98011864bfe89da837fe7769c28/mods/fantasycore/images/enemies/zombie.png",
+      "sha256": "2477c47f395352935bd8a5cd8fed6e08e0508c1a048ac1fa0aaa89849dd8ab3a"
+    }
+  ]
+}

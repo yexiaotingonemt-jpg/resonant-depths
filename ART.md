@@ -1,19 +1,28 @@
-# 美术与声音记录
+# 美术来源与制作记录
 
-使用内置 image_gen 工具。最终游戏内资产：`public/assets/arena.png`（1586 × 992）和 `public/assets/sprites.png`（1536 × 1024，带 alpha）。原始生成文件保留在 Codex generated_images 中，项目资产已复制到游戏目录。精灵通过 `src/assets.ts` 的明确矩形取帧，保留源图比例。
+## 正式角色与怪物动画
 
-## 视觉基准
+当前使用 **FLARE: Empyrean Campaign** 正式发布的角色与怪物美术，而非单张概念立绘。
 
-Full primary screen concept for RESONANT / 共鸣深井, 16:9 premium indie cooperative roguelite. Dark engraved aquamarine forest ruins, charcoal, muted pale mint typography, warm amber and teal guardians connected by a luminous tether, ominous magenta enemies. Ancient stone dais, luminous herbs and carved pillars. Thin DOM HUD, bottom skill and resonance controls. Title and two restrained menu buttons on left, guardians on right. Hand-painted engraved texture, readable negative space. Code-native interface.
+- 原始项目：[flareteam/flare-game](https://github.com/flareteam/flare-game)
+- 固定版本：`af6eee6d339ac98011864bfe89da837fe7769c28`
+- 作者：Clint Bellanger 及 Flare 美术贡献者。各文件、模型和纹理的详细作者保留在 [完整原始致谢](public/licenses/flare/CREDITS.txt)。
+- 许可：**Creative Commons Attribution-ShareAlike 3.0 Unported（CC BY-SA 3.0）**。保留 [原始完整许可证](public/licenses/flare/LICENSE.txt)。图像的合成和重打包衍生文件也按同一许可提供。
 
-## 场景生成提示词
+玩家 1 使用分层板甲、头部和长剑；玩家 2 使用分层法师长袍、兜帽和法杖。敌人采用僵尸、骷髅法师、牛头人、蚁狮、骷髅骑士和高阶骷髅法师。
 
-Production game environment background for RESONANT two-player top-down roguelite. 16:10 image. Orthographic directly overhead camera, huge oval ancient temple stone platform filling 90% of image, dark teal black bottomless chasm around edge. Playable floor x 7–93%, y 14–86%, flat unobstructed stones, shallow circular sun/moon engraving. Ruined pillars, white flowers, turquoise ferns and candles only in outer 8%. Dark charcoal teal, hand-painted ink engraving, sparse golden floor engravings, low contrast center. No characters, creatures, text, HUD or buttons.
+8 个角色族共 1,912 个动画单元，每个动作保留 **W、NW、N、NE、E、SE、S、SW 八个真实视角**。包含待机、跑步、挥击、施法、受击和倒地；跑步每方向至少 8 帧。没有用旋转一张正面图片代替转向。
 
-## 精灵生成提示词
+### 技术加工
 
-Production 2D game sprite atlas, transparent background, 4 columns by 2 rows, 1536x1024. Isolated full body overhead dark fantasy sprites, generous margins. Row 1: amber hooded sword guardian, turquoise hooded moon staff guardian, purple thorn melee wisp with pink eye, purple crystal staff cultist. Row 2: heavy purple thorn brute, sleek magenta wolf dasher, crowned stone golem with amber crystal heart and antlers, cyan-gold healing crystal flower. Consistent hand-painted engraved game style. No scenery, floor, text or interface.
+`scripts/import-flare-art.py` 从固定版本下载源图及原始帧偏移，按作者提供的方向图层顺序合成人物，并进行透明裁切与图集打包。整套角色使用同一缩放和脚底锚点，避免换方向时抖动或大小变化。没有重新生成或逐帧重画原作品。
+
+发布文件位于 `public/assets/flare/`，`manifest.json` 记录完整源路径、固定版本 URL 和 SHA-256。原始下载缓存保存在游戏目录之外的 `../scratch/resonant-flare-source/`。运行 `python scripts/import-flare-art.py` 可重建，需要 Pillow。游戏构建和游玩无需 Python。
+
+## 场景
+
+`public/assets/arena.png` 是本项目使用内置 Image Gen 制作的 1586 × 992 场景。俯视古代神殿石台、深青色深渊、日月刻纹、外围植物与烛火；场景中央保留平坦、低对比的战斗区域，不含角色或界面。旧的静态角色概念图已退出运行时。
 
 ## 声音
 
-Web Audio 本地合成，包含低频环境音、施法、受击、冲刺、击杀、救援与通关音序。界面右上角可静音。
+Web Audio 本地合成，包括环境音、施法、受击、冲刺、击杀和救援音效。右上角可静音。

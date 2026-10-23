@@ -5,3 +5,5 @@ qa/
 .env
 .env.*
 !.env.example
+.wrangler/
+server/.wrangler/
