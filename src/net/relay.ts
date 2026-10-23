@@ -35,6 +35,6 @@ export class RelayPeer extends Events {
  }
  connect(){this.current=new RelayConnection(this);const connection=this.current;queueMicrotask(()=>connection.emit('open'));return connection;}
  send(packet:unknown){if(this.socket.readyState===WebSocket.OPEN&&this.socket.bufferedAmount<512*1024)this.socket.send(JSON.stringify(packet));}
- closeConnection(){if(this.role==='host')this.send({relay:'kick'});else this.socket.close();this.current=null;}
+ closeConnection(){if(this.role==='host')this.send({relay:'kick'});else{this.destroyed=true;this.socket.close();}this.current=null;}
  destroy(){this.destroyed=true;this.current=null;this.socket.close();}
 }

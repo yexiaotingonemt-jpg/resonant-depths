@@ -7,9 +7,9 @@ import {Actors,type ActorKind} from './actors';
 import {facing8,type ActorPose} from './animation';
 export class Arena extends Phaser.Scene {
  g!:Phaser.GameObjects.Graphics; background!:Phaser.GameObjects.Image;actors=new Actors(this); texts:Phaser.GameObjects.Text[]=[]; textCursor=0; clock=0;
- constructor(public world:World,public inputMap:Input,public soundBank:Sound,public onFrame:()=>void,public step:(dt:number,actions:Action[])=>void=(dt,actions)=>world.update(dt,actions)){super('arena');}
- preload(){this.load.image('arena',assets.arena);this.actors.preload();}
- create(){this.background=this.add.image(W/2,H/2,'arena').setDisplaySize(W,H).setAlpha(.85);this.g=this.add.graphics();}
+ constructor(public world:World,public inputMap:Input,public soundBank:Sound,public onFrame:()=>void,public step:(dt:number,actions:Action[])=>void=(dt,actions)=>world.update(dt,actions),public onLoad:(progress:number,ready:boolean)=>void=()=>{}){super('arena');}
+ preload(){this.load.on('progress',(progress:number)=>this.onLoad(progress,false));this.load.image('arena',assets.arena);this.actors.preload();}
+ create(){this.background=this.add.image(W/2,H/2,'arena').setDisplaySize(W,H).setAlpha(.85);this.g=this.add.graphics();this.onLoad(1,true);}
  update(_time:number,delta:number){const dt=Math.min(delta/1000,.04);this.clock+=dt;this.step(dt,this.inputMap.read());const events=this.world.eventQueue.splice(0);for(const e of events){this.soundBank.play(e);if(e==='hurt')this.cameras.main.shake(80,.002);if(e==='ult')this.cameras.main.shake(250,.004);}this.soundBank.update(this.world.time,this.world.phase==='playing');this.renderWorld();this.onFrame();}
  ring(x:number,y:number,r:number,c:number,a=1,width=1){this.g.lineStyle(width,c,a);this.g.strokeCircle(x,y,r);}
  renderWorld(){const g=this.g,w=this.world,t=this.clock;g.clear();g.setDepth(900);this.texts.forEach(t=>t.setVisible(false));this.textCursor=0;

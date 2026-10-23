@@ -12,6 +12,7 @@ const world=new World(),sound=new Sound();
 const ui=document.querySelector<HTMLDivElement>('#ui')!;
 let roomValue=new URLSearchParams(location.search).get('room')||'';
 let mode=roomValue?'online':'ai',difficulty='normal',lastPhase='',hudClock=0,guide=false,savedEnd=false;
+let assetsReady=false,assetProgress=0;
 let record={runs:0,wins:0,best:0,dust:0};try{record={...record,...JSON.parse(localStorage.getItem('resonant-record')||'{}')};}catch{}
 let observedRun=0;const recordedOnlineRuns=new Set<string>();
 const net=new OnlineSession(world,()=>{if(net.run!==observedRun){observedRun=net.run;savedEnd=false;guide=false;}render();});
@@ -21,9 +22,9 @@ function autoPause(){if(world.phase==='playing'){if(net.active)net.pause();else 
 window.addEventListener('blur',autoPause);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)autoPause();});
 window.addEventListener('pagehide',()=>net.leave());
-const scene=new Arena(world,input,sound,()=>{if(world.phase!==lastPhase){render();lastPhase=world.phase;}if(performance.now()-hudClock>100){updateHud();hudClock=performance.now();}},(dt,actions)=>net.tick(dt,actions));
+const scene=new Arena(world,input,sound,()=>{if(world.phase!==lastPhase){render();lastPhase=world.phase;}if(performance.now()-hudClock>100){updateHud();hudClock=performance.now();}},(dt,actions)=>net.tick(dt,actions),(progress,ready)=>{assetProgress=Math.round(progress*100);assetsReady=ready;if(ready)render();else{const label=ui.querySelector('.asset-loading span'),bar=ui.querySelector<HTMLElement>('.asset-loading i');if(label)label.textContent=assetProgress+'%';if(bar)bar.style.width=assetProgress+'%';}});
 new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#101c1d',scene:[scene],scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true},audio:{noAudio:true},banner:false});
-function start(same=false){sound.start();input.clear();if(net.active){if(net.started)net.command(same?'retry':'restart');else net.start(difficulty);return;}world.reset(mode==='ai',same?world.seed:crypto.getRandomValues(new Uint32Array(1))[0],difficulty);savedEnd=false;guide=false;render();}
+function start(same=false){if(!assetsReady)return;sound.start();input.clear();if(net.active){if(net.started)net.command(same?'retry':'restart');else net.start(difficulty);return;}world.reset(mode==='ai',same?world.seed:crypto.getRandomValues(new Uint32Array(1))[0],difficulty);savedEnd=false;guide=false;render();}
 
 function controls(){return `<div class="control-columns"><div class="control-player amber"><b>01 <span>烬 · 逐火者</span></b><p>近距离爆燃，守住前线。</p><dl><dt>移动</dt><dd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dd><dt>冲刺</dt><dd><kbd>Space</kbd></dd><dt>焰环 · 范围爆燃</dt><dd><kbd>E</kbd></dd><dt>共鸣合击</dt><dd><kbd>Q</kbd></dd></dl></div><div class="control-player teal"><b>02 <span>澜 · 引潮者</span></b><p>涟漪护盾，为彼此续航。</p><dl><dt>移动</dt><dd><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></dd><dt>冲刺</dt><dd><kbd>Shift</kbd></dd><dt>潮汐 · 治疗与护盾</dt><dd><kbd>Enter</kbd></dd><dt>共鸣合击</dt><dd><kbd>/</kbd></dd></dl></div></div><div class="guide-rules"><p><b>自动攻击</b>进入射程后自动锁定最近敌人，专注走位与协作。</p><p><b>魂链灼烧</b>保持 400 距离内连接，让敌人穿过魂链，持续造成伤害。</p><p><b>守望救援</b>靠近倒地队友，停留 2.8 秒即可救援。两人同时倒地，远征结束。</p><p><b>双生共鸣</b>连接与击杀积累共鸣，满槽后任一玩家可释放全屏合击。</p><p><b>手柄支持</b>左摇杆移动 · A 冲刺 · X 技能 · Y 合击；一、二号手柄对应两位玩家。</p></div><small class="muted">联网双人：两人各用 WASD / 方向键、Space、E、Q 或自己的手柄。Esc / P 同步暂停。<br>同屏双人仍使用上方两套按键。</small>`;}
 function render(){
@@ -40,6 +41,7 @@ function render(){
  }
  ui.innerHTML+=onlineOverlay(net);
  if(guide)ui.innerHTML+=`<div class="scrim guide-scrim"><section class="modal guide-modal"><button class="close utility" data-action="close-guide" aria-label="关闭操作指南">×</button><div class="overline">A LIGHT FOR EACH OTHER</div><h2>同行者手册</h2>${controls()}<button class="primary" data-action="close-guide">记住了，出发吧 <span>→</span></button></section></div>`;
+ if(!assetsReady){ui.innerHTML+=`<div class="asset-loading" role="status">正在加载正式美术 <span>${assetProgress}%</span><div><i style="width:${assetProgress}%"></i></div></div>`;ui.querySelectorAll<HTMLButtonElement>('[data-action="start"],[data-action="net-ready"],[data-action="net-start"]').forEach(button=>button.disabled=true);}
  updateHud();
 }
 function formatTime(t:number){return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;}
