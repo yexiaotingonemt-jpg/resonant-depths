@@ -31,7 +31,7 @@ export function damageGrowth(w:World,owner:number){
 }
 export function watch(w:World){
  const g=w.growth,l=level(w,'rescue');if((!rank(w,'rescue_oath')&&l<3)||g.watchCooldown>0)return;
- g.watchTime=l>=3?8:6;g.watchCooldown=l>=5?8:12;w.cooperate('守望反攻 · 双方伤害 +25%');w.eventQueue.push('watch');
+ g.watchTime=l>=3?8:6;g.watchCooldown=l>=5?8:12;w.cooperate('支援成功！两人的伤害提高 25%');w.eventQueue.push('watch');
  for(const p of w.players)if(!p.down)w.effect('ring',p,0xf3d083,60);
 }
 function mend(w:World,target:Player){const n=rank(w,'rescue_mend');if(!n||target.down||w.growth.mendCooldown>0)return;target.hp=Math.min(target.maxHp,target.hp+8*n);w.growth.mendCooldown=10;w.effect('heal',target,0x8ce0bb,65);}
@@ -50,7 +50,7 @@ export function skillStarted(w:World,p:Player){
    if(rl>=5)for(const player of w.players)refund(player,1);
    if(rank(w,'relay_handoff')||rl>=5)g.handoff=5;
    const echo=(rank(w,'relay_oath')?24:0)+rank(w,'relay_echo')*16;if(echo)w.area(p,160,echo*w.stats.damage,0xffbf72,p.id,true);
-   g.relayCooldown=1.5;w.cooperate('交棒成功 · 回响与冷却回流');w.eventQueue.push('relay');
+   g.relayCooldown=1.5;w.cooperate('搭档接上了技能！');w.eventQueue.push('relay');
   }
   g.relayOwner=p.id;g.relayWindow=rl>=3?6:4;
  }
@@ -58,7 +58,7 @@ export function skillStarted(w:World,p:Player){
   if(rank(w,'vortex_oath'))pull(w,p,300+rank(w,'vortex_reach')*30+(vl>=3?30:0));
   if(g.storedGuard>0&&(rank(w,'bulwark_oath')||level(w,'bulwark')>=3)){
    const l=level(w,'bulwark'),stored=g.storedGuard;g.storedGuard=0;w.area(p,l>=5?260:200,stored*(l>=3?1.25:1),0x89dfd3,0,true);
-   if(l>=5)w.grantBarrier(20);w.cooperate(`承压反击 · 释放 ${Math.round(stored)} 蓄能`);w.eventQueue.push('counter');
+   if(l>=5)w.grantBarrier(20);w.cooperate(`释放反击！消耗 ${Math.round(stored)} 点蓄能`);w.eventQueue.push('counter');
   }
  }
 }
@@ -85,5 +85,5 @@ export function blocked(w:World,p:Player,n:number){
 }
 export function lifeline(w:World,p:Player){
  const ally=w.players[1-p.id];if(!rank(w,'rescue_lifeline')||w.growth.lifelineUsed||ally.down||dist(p,ally)>500)return false;
- w.growth.lifelineUsed=true;p.hp=p.maxHp*.3;p.inv=2;w.effect('heal',p,0xffe0a2,80);w.cooperate('最后一线 · 搭档的灯接住了你');w.eventQueue.push('watch');return true;
+ w.growth.lifelineUsed=true;p.hp=p.maxHp*.3;p.inv=2;w.effect('heal',p,0xffe0a2,80);w.cooperate('保命成功！生命回到 30%，本局机会已用掉');w.eventQueue.push('watch');return true;
 }

@@ -1,7 +1,7 @@
 import {World,clamp,idle,type Action} from '../sim';
 import {relics,type Route} from '../data';
 
-export const PROTOCOL=4;
+export const PROTOCOL=5;
 const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export function roomCode(){const values=crypto.getRandomValues(new Uint8Array(8));return Array.from(values,n=>alphabet[n%alphabet.length]).join('');}
 export const normalizeCode=(s:string)=>s.toUpperCase().replace(/[\s-]/g,'');
