@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {World,idle} from '../src/sim';
 import {Authority,capture,cleanAction,displayCode,normalizeCode,roomCode,singleAction,validCode,validSnapshot} from '../src/net/protocol';
+import {relics} from '../src/data';
 
 test('room codes survive human formatting and have no ambiguous characters',()=>{const codes=Array.from({length:100},()=>roomCode());assert.equal(new Set(codes).size,100);for(const code of codes){assert.ok(validCode(code));assert.equal(normalizeCode(displayCode(code).toLowerCase()),code);}assert.ok(!validCode('123'));assert.ok(!validCode('IIII0000'));});
 test('remote actions are bounded and malformed numbers are discarded',()=>{assert.equal(cleanAction({x:NaN,y:0}),null);assert.equal(cleanAction({x:1,y:Infinity}),null);assert.equal(cleanAction(null),null);assert.deepEqual(cleanAction({x:999,y:-10,dash:'true'}),{x:1,y:-1,dash:false,skill:false,ult:false});});
@@ -38,4 +39,48 @@ test('a remote ultimate vote is held until the host independently confirms',()=>
  const state=capture(w);assert.ok(validSnapshot(state));assert.ok(state.players[1].ultReady>3);
  a.step(1/60,{...idle(),ult:true},1018);assert.equal(w.charge,0);assert.equal(w.ultFlash,.8);
  assert.ok(w.players.every(p=>p.ultReady===0));
+});
+
+test('online oath draft is a shared choice and starts the first room exactly once',()=>{
+ const w=new World(),a=new Authority(w);a.start(731,'normal',true);
+ assert.equal(w.phase,'reward');assert.equal(w.growth.drafting,true);assert.equal(w.room,0);
+ const epoch=a.epoch,choice=w.choices[0];assert.equal(choice.core,true);
+ assert.ok(a.command({kind:'relic',value:choice.id,epoch},true));
+ assert.equal(w.phase,'playing');assert.equal(w.growth.drafting,false);assert.equal(w.room,0);
+ assert.equal(w.growth.path,choice.path);assert.deepEqual(w.inventory,[choice.id]);
+ assert.equal(a.command({kind:'relic',value:choice.id,epoch}),false);
+});
+
+test('reroll revisions reject a delayed teammate choice and prevent repeated spending',()=>{
+ const w=new World(),a=new Authority(w);a.start(34,'normal',true);
+ const draftEpoch=a.epoch;assert.equal(a.command({kind:'reroll',epoch:draftEpoch},true),false);
+ assert.equal(w.growth.rerolls,2);a.command({kind:'relic',value:w.choices[0].id,epoch:draftEpoch});
+ w.phase='reward';w.choices=w.offerRelics();const epoch=a.epoch,old=w.choices.map(r=>r.id);
+ assert.ok(a.command({kind:'reroll',epoch},true));assert.equal(w.growth.rerolls,1);
+ assert.notEqual(a.epoch,epoch);assert.equal(a.command({kind:'reroll',epoch}),false);
+ assert.equal(a.command({kind:'relic',value:old[0],epoch},true),false);
+ assert.equal(w.inventory.length,1);assert.equal(w.phase,'reward');
+ assert.ok(a.command({kind:'reroll',epoch:a.epoch}));assert.equal(w.growth.rerolls,0);
+ assert.equal(a.command({kind:'reroll',epoch:a.epoch},true),false);
+});
+
+test('new run and same-seed retry return to a synchronized oath draft',()=>{
+ const w=new World(),a=new Authority(w);a.start(1729,'normal',true);
+ const first=w.choices.map(r=>r.id);a.command({kind:'relic',value:first[0],epoch:a.epoch});
+ w.growth.rerolls=0;w.phase='lost';assert.ok(a.command({kind:'retry',epoch:a.epoch}));
+ assert.equal(w.phase,'reward');assert.equal(w.growth.drafting,true);assert.equal(w.room,0);
+ assert.equal(w.growth.rerolls,2);assert.deepEqual(w.choices.map(r=>r.id),first);assert.equal(w.inventory.length,0);
+});
+
+test('growth snapshots preserve archetypes and reject malformed ranks and reroll tokens',()=>{
+ const w=new World();w.reset(false,34);w.beginDraft();w.choose(w.choices[0].id);
+ w.applyRelic('relay_refund');w.applyRelic('bulwark_capacity');
+ const state=capture(w);assert.ok(validSnapshot(state));assert.deepEqual(state.growth,w.growth);
+ assert.equal(validSnapshot({...state,growth:{...state.growth,rerolls:-1}}),false);
+ assert.equal(validSnapshot({...state,growth:{...state.growth,rerolls:7}}),false);
+ assert.equal(validSnapshot({...state,growth:{...state.growth,path:'unknown'}}),false);
+ assert.equal(validSnapshot({...state,growth:{...state.growth,offerRevision:NaN}}),false);
+ assert.equal(validSnapshot({...state,inventory:Array(4).fill('relay_refund')}),false);
+ const core=relics.filter(r=>r.core).slice(0,2).map(r=>r.id);
+ assert.equal(validSnapshot({...state,inventory:core}),false);
 });

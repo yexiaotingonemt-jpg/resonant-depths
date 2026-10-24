@@ -37,6 +37,10 @@ export class Arena extends Phaser.Scene {
     if(p.barrier>0){g.lineStyle(2,0x96eddf,.55+.15*Math.sin(t*4));g.strokeEllipse(p.x,p.y-30,54,77);g.fillStyle(0x8ee9dc,.04);g.fillEllipse(p.x,p.y-30,54,77);this.label(p.x,p.y+33,'护盾 '+Math.ceil(p.barrier),9,'#a4f0df');}
     if(snare){this.ring(p.x,p.y,29,0xe39bfc,.9,3);this.label(p.x,p.y-86,`锁魂 ${snare.snareTime.toFixed(1)}s`,12,'#f0b1ff');}
     else if(p.ultReady>0){this.ring(p.x,p.y,34+Math.sin(t*6)*3,0xffe3a5,.85,2);this.label(p.x,p.y-86,`合击就绪 ${p.ultReady.toFixed(1)}s`,11,'#ffe7a6');}
+    if(w.growth.watchTime>0){this.ring(p.x,p.y,39,0xbad6ff,.35+.12*Math.sin(t*5),2);}
+    else if(w.growth.handoff>0){this.ring(p.x,p.y,39,0xffd885,.4+.12*Math.sin(t*6),2);}
+    if(w.growth.relayWindow>0&&w.growth.relayOwner>=0&&p.id!==w.growth.relayOwner){g.fillStyle(0xffde9c,.8);for(let i=0;i<3;i++){const a=t*2+i*Math.PI*2/3;g.fillCircle(p.x+Math.cos(a)*28,p.y+Math.sin(a)*13,2.5);}}
+    if(p.id===0&&w.growth.storedGuard>0)this.label(p.x,p.y+46,'反击蓄能 '+Math.floor(w.growth.storedGuard),9,'#f7ca89');
     if(w.stats.orbit){const ox=p.x+Math.cos(w.time*3+p.id*3)*55,oy=p.y+Math.sin(w.time*3+p.id*3)*55;g.fillStyle(c,1);g.fillCircle(ox,oy,7);this.ring(ox,oy,11,c,.35);}
    }
   });
@@ -70,7 +74,7 @@ export class Arena extends Phaser.Scene {
    if(e.kind==='brute'||e.kind==='boss')this.label(e.x,head-29,'◆ 灵印 · 烬来破甲',10,'#a9f4de');
   }
   if(e.taunt>0)this.label(e.x+e.r+9,e.y-34,'↯',15,'#ffd296');
-  if(e.snareTarget>=0&&e.snareTime>0)this.label(e.x,head-45,`锁魂源头 · 还需 ${Math.max(0,3-e.snareHits)} 击`,11,'#efb5ff');
+  if(e.snareTarget>=0&&e.snareTime>0)this.label(e.x,head-45,`锁魂源头 · 还需 ${Math.max(0,this.world.rescueHitsNeeded()-e.snareHits)} 击`,11,'#efb5ff');
   if(e.hp<e.maxHp&&e.kind!=='boss'){g.fillStyle(0x191a21,1);g.fillRect(e.x-18,head,36,3);g.fillStyle(c,.9);g.fillRect(e.x-18,head,36*Math.max(0,e.hp/e.maxHp),3);}
 
  }

@@ -1,4 +1,5 @@
-import {relics, type Relic, type Route} from './data';
+import {relics, relicRank, type Relic, type Route} from './data';
+import * as builds from './builds';
 export const W=1280,H=800;
 export const bounds={left:95,right:1185,top:138,bottom:690};
 export type Phase='menu'|'playing'|'paused'|'reward'|'route'|'won'|'lost';
@@ -20,11 +21,12 @@ export class World {
  seed=1;randomState=1;nextId=1;kills=0;dust=0;combo=0;bestCombo=0;comboTimer=0;revives=0;ai=true;difficulty='normal';route:Route='battle';
  inventory:string[]=[];choices:Relic[]=[];routes:Route[]=[];eventQueue:string[]=[];notice='';noticeTime=0;
  coop={links:0,rescues:0,bursts:0,last:'',lastTime:0};
+ growth=builds.initialGrowth();
  stats={damage:1,rate:1,maxHp:100,speed:190,dashCd:2.2,skillCd:8,chain:1,linkRange:400,nova:1,roomCharge:0,pierce:0,shots:1,leech:0,armor:1,revive:1,reviveHp:.45,chargeRate:1,healUlt:0,frost:0,orbit:0,dashDamage:0,close:0,skill:1,magnet:0};
  constructor(){this.reset(true,1);this.phase='menu';}
  rand(){let t=this.randomState+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;}
  reset(ai:boolean,seed:number,difficulty='normal'){
-  this.ai=ai;this.seed=seed>>>0;this.randomState=this.seed;this.difficulty=difficulty;this.phase='playing';this.room=0;this.time=0;this.nextId=1;this.kills=0;this.dust=0;this.combo=0;this.bestCombo=0;this.revives=0;this.inventory=[];this.eventQueue=[];this.charge=0;this.ultFlash=0;this.coop={links:0,rescues:0,bursts:0,last:'',lastTime:0};
+  this.ai=ai;this.seed=seed>>>0;this.randomState=this.seed;this.difficulty=difficulty;this.phase='playing';this.room=0;this.time=0;this.nextId=1;this.kills=0;this.dust=0;this.combo=0;this.bestCombo=0;this.revives=0;this.inventory=[];this.eventQueue=[];this.charge=0;this.ultFlash=0;this.coop={links:0,rescues:0,bursts:0,last:'',lastTime:0};this.growth=builds.initialGrowth();
   this.stats={damage:1,rate:1,maxHp:100,speed:190,dashCd:2.2,skillCd:8,chain:1,linkRange:400,nova:1,roomCharge:0,pierce:0,shots:1,leech:0,armor:1,revive:1,reviveHp:.45,chargeRate:1,healUlt:0,frost:0,orbit:0,dashDamage:0,close:0,skill:1,magnet:0};
   this.players=[0,1].map(id=>({id,x:570+id*140,y:420,hp:100,maxHp:100,dir:{x:0,y:1},moving:false,shot:0,dash:0,dashTime:0,skill:0,inv:1,down:false,revive:0,trail:[],barrier:0,barrierTime:0,ultReady:0}));this.enterRoom('battle');
  }
@@ -34,7 +36,7 @@ export class World {
  enterRoom(route:Route){
   this.route=route;this.phase='playing';this.enemies=[];this.bullets=[];this.pickups=[];this.fx=[];this.hazards=[];this.wave=0;this.roomTime=0;this.spawnTimer=1.6;this.intermission=0;this.waves=this.room%3===2?1:2+(this.room>=3?1:0);this.bossName='';this.coop.last='';this.coop.lastTime=0;
   this.players.forEach((p,i)=>{p.x=570+i*140;p.y=430;p.inv=2;p.dash=0;p.skill=Math.min(p.skill,2);p.trail=[];p.moving=false;p.barrier=0;p.barrierTime=0;p.ultReady=0;if(p.down){p.down=false;p.hp=p.maxHp*.35;p.revive=0;}});
-  if(route==='spring')this.healAll(this.stats.maxHp*.35);if(route==='elite')this.healAll(10);this.charge=clamp(this.charge+this.stats.roomCharge,0,100);this.notify(this.room%3===2?'击碎护甲，打断束缚；守护者正在苏醒':'织灯标记 → 破阵击碎 → 织灯引爆返盾');
+  builds.enterGrowthRoom(this);if(route==='spring')this.healAll(this.stats.maxHp*.35);if(route==='elite')this.healAll(10);this.charge=clamp(this.charge+this.stats.roomCharge,0,100);this.notify(this.room%3===2?'击碎护甲，打断束缚；守护者正在苏醒':'织灯标记 → 破阵击碎 → 织灯引爆返盾');
  }
  togglePause(){if(this.phase==='paused')this.phase=this.beforePause;else if(this.phase==='playing'){this.beforePause=this.phase;this.phase='paused';}}
  nearest(p:Vec){return this.enemies.filter(e=>e.hp>0).sort((a,b)=>distance(a,p)-distance(b,p))[0];}
@@ -55,12 +57,14 @@ export class World {
    if(e){const ed=distance(p,e);if(ed<155)add({x:p.x-e.x,y:p.y-e.y},2.8);else if(ed>370)add({x:e.x-p.x,y:e.y-p.y},.25);}
   }
   for(const b of this.bullets)if(b.owner<0&&distance(b,p)<95)add({x:p.x-b.x,y:p.y-b.y},4);
-  const n=Math.hypot(x,y);return{x:n>15?x/n:0,y:n>15?y/n:0,dash:!a.down&&!!e&&distance(e,p)<70,skill:this.enemies.some(e=>e.hp>0&&distance(e,p)<400+e.r&&(e.fracture>0||e.snareTarget===0)),ult:this.charge>=100&&a.ultReady>0};
+  const needsSupport=!a.down&&a.hp<=a.maxHp*.45&&distance(a,p)<=400&&(builds.rank(this,'rescue_oath')||builds.rank(this,'rescue_mend')||builds.level(this,'rescue')>=3);
+  const relayReply=this.growth.relayOwner===0&&this.growth.relayWindow>0&&!!e;
+  const n=Math.hypot(x,y);return{x:n>15?x/n:0,y:n>15?y/n:0,dash:!a.down&&!!e&&distance(e,p)<70,skill:!!needsSupport||relayReply||this.enemies.some(e=>e.hp>0&&distance(e,p)<builds.skillRadius(this,1)+e.r&&(e.fracture>0||e.snareTarget===0)),ult:this.charge>=100&&a.ultReady>0};
  }
  update(dt:number,actions:Action[]){
-  if(this.phase!=='playing')return;dt=Math.min(dt,.04);this.time+=dt;this.roomTime+=dt;this.noticeTime-=dt;this.coop.lastTime=Math.max(0,this.coop.lastTime-dt);this.ultFlash=Math.max(0,this.ultFlash-dt);this.comboTimer-=dt;if(this.comboTimer<=0)this.combo=0;
+  if(this.phase!=='playing')return;dt=Math.min(dt,.04);this.time+=dt;this.roomTime+=dt;this.noticeTime-=dt;this.coop.lastTime=Math.max(0,this.coop.lastTime-dt);this.ultFlash=Math.max(0,this.ultFlash-dt);this.comboTimer-=dt;if(this.comboTimer<=0)this.combo=0;builds.tickGrowth(this,dt);
   this.fx.forEach(f=>f.life-=dt);this.fx=this.fx.filter(f=>f.life>0);if(this.ai)actions[1]=this.aiAction();
-  const [a,b]=this.players;this.link=!a.down&&!b.down&&distance(a,b)<=this.stats.linkRange;
+  const [a,b]=this.players;this.link=!a.down&&!b.down&&distance(a,b)<=this.stats.linkRange+60*builds.rank(this,'vortex_thread');
   this.players.forEach((p,i)=>this.updatePlayer(p,actions[i]||idle(),dt));
   this.enemies.forEach(e=>this.updateEnemy(e,dt));
   for(const hazard of this.hazards){hazard.timer-=dt;if(hazard.timer<=0){this.effect('ring',hazard,0xec98b6,hazard.r);for(const p of this.players)if(!p.down&&distance(p,hazard)<hazard.r)this.hurtPlayer(p,24);}}
@@ -68,7 +72,7 @@ export class World {
   for(let i=0;i<this.enemies.length;i++)for(let j=i+1;j<this.enemies.length;j++){const e=this.enemies[i],f=this.enemies[j],d=distance(e,f),r=(e.r+f.r)*.8;if(d>0&&d<r){const k=(r-d)*.5;e.x+=(e.x-f.x)/d*k;e.y+=(e.y-f.y)/d*k;f.x-=(e.x-f.x)/d*k;f.y-=(e.y-f.y)/d*k;}}
   this.chainTick=Math.max(0,this.chainTick-dt);
   for(const bullet of this.bullets){bullet.x+=bullet.vx*dt;bullet.y+=bullet.vy*dt;bullet.life-=dt;
-   if(bullet.owner>=0){for(const e of this.enemies)if(e.hp>0&&!bullet.hit.includes(e.id)&&distance(e,bullet)<e.r+bullet.r){this.hurtEnemy(e,bullet.damage,bullet.owner,'basic');if(this.stats.frost)e.slow=Math.max(e.slow,1.5);bullet.hit.push(e.id);if(bullet.pierce--<=0){bullet.life=0;break;}}}
+   if(bullet.owner>=0){for(const e of this.enemies)if(e.hp>0&&!bullet.hit.includes(e.id)&&distance(e,bullet)<e.r+bullet.r){this.hurtEnemy(e,bullet.damage,bullet.owner,'basic');if(this.stats.frost)e.slow=Math.max(e.slow,1.5*this.stats.frost);bullet.hit.push(e.id);if(bullet.pierce--<=0){bullet.life=0;break;}}}
    else for(const p of this.players)if(!p.down&&distance(p,bullet)<14+bullet.r){this.hurtPlayer(p,10+this.room*1.1);bullet.life=0;break;}
   }
   this.bullets=this.bullets.filter(b=>b.life>0&&b.x>45&&b.x<W-45&&b.y>75&&b.y<H-70);
@@ -79,7 +83,7 @@ export class World {
  }
  updatePlayer(p:Player,input:Action,dt:number){
   p.moving=false;p.inv=Math.max(0,p.inv-dt);p.dash=Math.max(0,p.dash-dt);p.skill=Math.max(0,p.skill-dt);p.shot-=dt;p.dashTime=Math.max(0,p.dashTime-dt);p.barrierTime=Math.max(0,p.barrierTime-dt);if(p.barrierTime<=0)p.barrier=0;p.ultReady=Math.max(0,p.ultReady-dt);
-  if(p.down){p.ultReady=0;const ally=this.players[1-p.id];if(!ally.down&&distance(ally,p)<78){p.revive+=dt*this.stats.revive;if(p.revive>=2.8){p.down=false;p.hp=p.maxHp*this.stats.reviveHp;p.inv=2;p.revive=0;this.revives++;this.coop.rescues++;this.addCharge(15);this.cooperate('守住搭档 · 扶起成功 +15 共鸣');this.effect('heal',p,0x8ee5c6,70);this.notify('重新点亮 · 搭档已获救');this.eventQueue.push('revive');}}else p.revive=Math.max(0,p.revive-dt*.5);return;}
+  if(p.down){p.ultReady=0;const ally=this.players[1-p.id];if(!ally.down&&distance(ally,p)<this.reviveRange()){p.revive+=dt*builds.reviveRate(this);if(p.revive>=2.8){p.down=false;p.hp=p.maxHp*this.stats.reviveHp;p.inv=2;p.revive=0;this.revives++;this.coop.rescues++;this.addCharge(15);builds.rescued(this,p);this.cooperate('守住搭档 · 扶起成功 +15 共鸣');this.effect('heal',p,0x8ee5c6,70);this.notify('重新点亮 · 搭档已获救');this.eventQueue.push('revive');}}else p.revive=Math.max(0,p.revive-dt*.5);return;}
   let n=Math.hypot(input.x,input.y);const mx=n>1?input.x/n:input.x,my=n>1?input.y/n:input.y;if(n>.1)p.dir={x:mx,y:my};p.moving=n>.1||p.dashTime>0;
   if(input.dash&&p.dash<=0){p.dash=this.stats.dashCd;p.dashTime=.18;p.inv=Math.max(p.inv,.32);this.eventQueue.push('dash');this.effect('dash',p,p.id?0x80dfcf:0xf6c778,40);if(this.stats.dashDamage)this.area(p,95,this.stats.dashDamage,0xf6c778,p.id);}
   const snared=this.enemies.some(e=>e.hp>0&&e.snareTarget===p.id&&e.snareTime>0),speed=this.stats.speed*(p.dashTime>0?4.8:1)*(snared?.55:1);p.x=clamp(p.x+(p.dashTime>0?p.dir.x:mx)*speed*dt,bounds.left,bounds.right);p.y=clamp(p.y+(p.dashTime>0?p.dir.y:my)*speed*dt,bounds.top,bounds.bottom);
@@ -93,43 +97,47 @@ export class World {
   if(this.stats.orbit){const o={x:p.x+Math.cos(this.time*3+p.id*3)*55,y:p.y+Math.sin(this.time*3+p.id*3)*55};for(const e of this.enemies)if(distance(e,o)<e.r+12)this.hurtEnemy(e,30*this.stats.orbit*dt,p.id);}
  }
  addCharge(n:number){this.charge=clamp(this.charge+n*this.stats.chargeRate,0,100);}
+ rescueHitsNeeded(){return builds.rescueHitsNeeded(this);}
+ reviveRange(){return builds.reviveRange(this);}
+ reviveSeconds(){return 2.8/builds.reviveRate(this);}
  healAll(n:number){if(!n)return;for(const p of this.players)if(!p.down){p.hp=Math.min(p.maxHp,p.hp+n);this.effect('heal',p,0x89dbb7,45);}}
- grantBarrier(n:number){const p=this.players[0];if(p.down)return;p.barrier=Math.min(55,p.barrier+n);p.barrierTime=6;this.effect('heal',p,0x85e2d1,40);}
- shatter(e:Enemy){e.mark=0;e.fracture=this.difficulty==='gentle'?7:5;this.coop.links++;this.addCharge(8);this.cooperate('破印成功 · 织灯者引爆返盾');this.effect('ring',e,0xffca77,e.r+25);this.effect('text',e,0xffca77,16,'破印');this.eventQueue.push('shatter');}
+ grantBarrier(n:number){const p=this.players[0];if(p.down||n<=0)return;p.barrier=Math.min(builds.barrierCap(this),p.barrier+n);p.barrierTime=builds.barrierDuration(this);this.effect('heal',p,0x85e2d1,40);const share=builds.rank(this,'bulwark_share'),ally=this.players[1];if(share&&!ally.down){ally.barrier=Math.min(builds.barrierCap(this),ally.barrier+n*.35*share);ally.barrierTime=p.barrierTime;this.effect('heal',ally,0x85e2d1,35);}}
+ shatter(e:Enemy){e.mark=0;e.fracture=builds.fractureDuration(this);this.coop.links++;this.addCharge(8);this.cooperate('破印成功 · 织灯者引爆返盾');this.effect('ring',e,0xffca77,e.r+25);this.effect('text',e,0xffca77,16,'破印');this.eventQueue.push('shatter');builds.shattered(this,e);}
  castSkill(p:Player){
-  if(p.down||p.skill>0)return;p.skill=this.stats.skillCd;this.eventQueue.push('skill');
+  if(p.down||p.skill>0)return;p.skill=this.stats.skillCd;this.eventQueue.push('skill');builds.skillStarted(this,p);const radius=builds.skillRadius(this,p.id);
   if(p.id===0){
-   for(const e of this.enemies)if(e.hp>0&&distance(e,p)<175+e.r){const marked=e.mark>0;e.taunt=5;if(marked)this.shatter(e);this.hurtEnemy(e,(marked?60*(this.stats.close?1.3:1):24)*this.stats.skill*this.stats.damage,p.id,'skill',marked);}
-   this.effect('ring',p,0xf9c978,175);
+   for(const e of this.enemies)if(e.hp>0&&distance(e,p)<radius+e.r){const marked=e.mark>0;e.taunt=5;if(marked)this.shatter(e);this.hurtEnemy(e,(marked?60*(1+this.stats.close*.3):24)*this.stats.skill*this.stats.damage,p.id,'skill',marked);}
+   this.effect('ring',p,0xf9c978,radius);
   }else{
    let detonations=0;
-   for(const e of this.enemies)if(e.hp>0&&distance(e,p)<400+e.r){
-    if(e.fracture>0){e.fracture=0;e.mark=0;detonations++;this.coop.bursts++;this.addCharge(12);this.hurtEnemy(e,90*this.stats.skill*this.stats.damage*(this.stats.close?1.3:1),p.id,'skill',true);this.effect('ring',e,0x83e2cd,e.r+40);this.effect('text',e,0x83e2cd,16,'引爆');}
-    else{e.mark=this.difficulty==='gentle'?8:6;this.hurtEnemy(e,0,p.id,'skill');}
+   for(const e of this.enemies)if(e.hp>0&&distance(e,p)<radius+e.r){
+    if(e.fracture>0){e.fracture=0;e.mark=0;detonations++;this.coop.bursts++;this.addCharge(12);builds.detonated(this,e,detonations);this.hurtEnemy(e,90*this.stats.skill*this.stats.damage*(1+this.stats.close*.3),p.id,'skill',true);this.effect('ring',e,0x83e2cd,e.r+40);this.effect('text',e,0x83e2cd,16,'引爆');}
+    else{e.mark=builds.markDuration(this);this.hurtEnemy(e,0,p.id,'skill');}
    }
-   if(detonations){this.grantBarrier(detonations*18);p.hp=Math.min(p.maxHp,p.hp+detonations*4);this.cooperate(`引爆 ${detonations} 次 · 破阵获盾，织灯回血`);this.eventQueue.push('detonate');}
-   this.effect('ring',p,0x83e2cd,400);
+   if(detonations){this.grantBarrier(detonations*(18+builds.rank(this,'bulwark_return')*5));p.hp=Math.min(p.maxHp,p.hp+detonations*4);this.cooperate(`引爆 ${detonations} 次 · 破阵获盾，织灯回血`);this.eventQueue.push('detonate');}
+   this.effect('ring',p,0x83e2cd,radius);
   }
  }
  beginSnare(e:Enemy,targetId:number){
   const target=this.players[targetId];if(e.hp<=0||!target||target.down||e.snareTime>0||this.enemies.some(other=>other!==e&&other.hp>0&&other.snareTarget===targetId&&other.snareTime>0))return;
-  e.snareTarget=targetId;e.snareTime=this.difficulty==='gentle'?7:5.5;e.snareHits=0;this.effect('ring',target,0xe5a0cb,42);this.cooperate(`P${targetId+1} 被束缚 · 搭档攻击施法者 3 次，或技能解救`);this.eventQueue.push('snare');
+  e.snareTarget=targetId;e.snareTime=this.difficulty==='gentle'?7:5.5;e.snareHits=0;this.effect('ring',target,0xe5a0cb,42);this.cooperate(`P${targetId+1} 被束缚 · 搭档攻击施法者 ${this.rescueHitsNeeded()} 次，或技能解救`);this.eventQueue.push('snare');
  }
  clearSnare(e:Enemy,rescuer=-1){
   const target=e.snareTarget,active=e.snareTime>0&&target>=0;e.snareTarget=-1;e.snareTime=0;e.snareHits=0;
-  if(active&&rescuer>=0&&rescuer!==target){this.coop.rescues++;this.addCharge(8);this.effect('heal',this.players[target],0x9ae4cf,65);this.effect('text',e,0x9ae4cf,14,'解救');this.cooperate(`P${rescuer+1} 打断束缚 · 搭档获救 +8 共鸣`);this.eventQueue.push('rescue');}
+  if(active&&rescuer>=0&&rescuer!==target){this.coop.rescues++;this.addCharge(8);this.effect('heal',this.players[target],0x9ae4cf,65);this.effect('text',e,0x9ae4cf,14,'解救');this.cooperate(`P${rescuer+1} 打断束缚 · 搭档获救 +8 共鸣`);this.eventQueue.push('rescue');builds.rescued(this,this.players[target]);}
  }
  hurtPlayer(p:Player,n:number){
-  if(p.inv>0||p.down)return;let damage=Math.max(1,n*this.stats.armor)*(this.difficulty==='gentle'?.65:1);
-  if(p.barrier>0&&p.barrierTime>0){const blocked=Math.min(p.barrier,damage);p.barrier-=blocked;damage-=blocked;this.effect('text',p,0x95e6ce,13,`护盾 ${Math.round(blocked)}`);}
-  p.hp=Math.max(0,p.hp-damage);p.inv=.7;this.effect('hit',p,0xfa9d87,30);this.eventQueue.push('hurt');if(p.hp<=0){p.down=true;p.revive=0;p.barrier=0;p.barrierTime=0;this.players.forEach(ally=>ally.ultReady=0);this.notify('搭档倒下！靠近光点，停留 2.8 秒救援');}
+  if(p.inv>0||p.down)return;let damage=Math.max(1,n*this.stats.armor)*(this.difficulty==='gentle'?.65:1)*(this.growth.watchTime>0&&builds.level(this,'rescue')>=5?.8:1);
+  if(p.barrier>0&&p.barrierTime>0){const blocked=Math.min(p.barrier,damage);p.barrier-=blocked;damage-=blocked;this.effect('text',p,0x95e6ce,13,`护盾 ${Math.round(blocked)}`);builds.blocked(this,p,blocked);}
+  p.hp=Math.max(0,p.hp-damage);p.inv=.7;this.effect('hit',p,0xfa9d87,30);this.eventQueue.push('hurt');if(p.hp<=0){if(builds.lifeline(this,p))return;p.down=true;p.revive=0;p.barrier=0;p.barrierTime=0;this.players.forEach(ally=>ally.ultReady=0);this.notify(`搭档倒下！靠近光点，停留 ${this.reviveSeconds().toFixed(1)} 秒救援`);}
  }
  hurtEnemy(e:Enemy,n:number,owner=-1,kind:'basic'|'skill'|'other'='other',bypass=false){
   if(e.hp<=0)return;
-  if(e.snareTime>0&&owner>=0&&owner!==e.snareTarget){if(kind==='skill')this.clearSnare(e,owner);else if(kind==='basic'&&++e.snareHits>=3)this.clearSnare(e,owner);}
-  if(kind==='basic'&&owner===1)e.mark=this.difficulty==='gentle'?8:6;
-  if(kind==='basic'&&owner===0&&e.mark>0){this.shatter(e);n+=32*this.stats.damage*(this.stats.close?1.3:1);bypass=true;}
-  const damage=n*(e.guard&&e.fracture<=0&&!bypass?.25:1);e.hp-=damage;
+  if(e.snareTime>0&&owner>=0&&owner!==e.snareTarget){if(kind==='skill')this.clearSnare(e,owner);else if(kind==='basic'&&++e.snareHits>=this.rescueHitsNeeded())this.clearSnare(e,owner);}
+  if(kind==='skill')builds.skillHit(this,e);
+  if(kind==='basic'&&owner===1)e.mark=builds.markDuration(this);
+  if(kind==='basic'&&owner===0&&e.mark>0){this.shatter(e);n+=32*this.stats.damage*(1+this.stats.close*.3);bypass=true;}
+  const damage=n*(e.guard&&e.fracture<=0&&!bypass?.25:1)*builds.damageGrowth(this,owner);e.hp-=damage;
   if(damage>0){e.hit=.1;if(damage>=2)this.effect('text',e,0xf5dfb2,12,String(Math.round(damage)));}
   if(e.hp<=0){this.clearSnare(e,owner);this.kills++;this.combo++;this.bestCombo=Math.max(this.bestCombo,this.combo);this.comboTimer=3;this.effect('death',e,e.kind==='boss'?0xf4c477:0xb880a4,e.r*2);this.pickups.push({x:e.x,y:e.y,value:(e.kind==='boss'?80:e.kind==='brute'?8:3)*(this.route==='elite'?2:1)});this.eventQueue.push(e.kind==='boss'?'bosskill':'kill');if(this.stats.leech&&this.kills%6===0)this.healAll(3*this.stats.leech);}
  }
@@ -167,12 +175,27 @@ export class World {
    }
   }
   if(e.kind==='boss'&&e.snareTime>0)move*=.35;
-  const tethered=this.link&&segmentDistance(e,this.players[0],this.players[1])<e.r+7,slow=Math.min(tethered?clamp(.82/this.stats.chain,.4,.82):1,e.slow>0?.65:1);
+  const tethered=this.link&&segmentDistance(e,this.players[0],this.players[1])<e.r+7+8*builds.rank(this,'vortex_thread'),slow=Math.min(tethered?clamp(.82/this.stats.chain,.4,.82):1,e.slow>0?.65:1);
   e.moving=Math.abs(move)>.01;e.facing={x:dx*(move<0?-1:1),y:dy*(move<0?-1:1)};e.x=clamp(e.x+dx*e.speed*move*dt*slow,85,1195);e.y=clamp(e.y+dy*e.speed*move*dt*slow,130,700);
   for(const player of alive)if(distance(e,player)<e.r+12)this.hurtPlayer(player,e.kind==='boss'?24:e.kind==='brute'?21:12);
  }
  enemyBullet(e:Enemy,angle:number,speed:number){this.bullets.push({id:this.nextId++,x:e.x,y:e.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r:7,life:6,owner:-1,damage:12,pierce:0,hit:[]});}
- offerRelics(){return [...relics].map(r=>({r,n:this.rand()})).sort((a,b)=>a.n-b.n).slice(0,3).map(x=>x.r);}
- choose(id:string){if(this.phase!=='reward'||!this.choices.some(r=>r.id===id))return;this.applyRelic(id);this.room++;if(this.room%3===2){this.routes=['battle'];}else this.routes=this.rand()<.5?['battle','elite']:['spring','elite'];this.phase='route';this.eventQueue.push('select');}
- applyRelic(id:string){this.inventory.push(id);const s=this.stats;switch(id){case'power':s.damage*=1.25;break;case'haste':s.rate*=.84;s.skillCd*=.88;break;case'health':s.maxHp+=25;this.players.forEach(p=>p.maxHp+=25);this.healAll(30);break;case'chain':s.chain*=1.5;s.linkRange+=45;break;case'nova':s.nova*=1.4;s.roomCharge+=15;break;case'speed':s.speed*=1.12;s.dashCd*=.82;break;case'pierce':s.pierce++;s.damage*=1.08;break;case'multishot':s.shots=Math.min(6,s.shots+1);break;case'leech':s.leech++;break;case'armor':s.armor*=.82;break;case'revive':s.revive*=1.6;s.reviveHp=.65;break;case'charge':s.chargeRate*=1.35;s.healUlt+=10;break;case'frost':s.frost=1;break;case'orbit':s.orbit++;break;case'dash':s.dashDamage+=45;break;case'close':s.close=1;break;case'skill':s.skill*=1.45;s.skillCd*=.85;break;case'magnet':s.magnet+=90;break;}}
+ beginDraft(){
+  if(this.room!==0||this.roomTime>0||this.inventory.length||this.growth.drafting)return false;
+  this.growth.drafting=true;this.phase='reward';this.growth.offerRevision++;this.choices=relics.filter(r=>r.core).map(r=>({r,n:this.rand()})).sort((a,b)=>a.n-b.n).slice(0,3).map(x=>x.r);return true;
+ }
+ offerRelics(avoid:string[]=[]){
+  this.growth.offerRevision++;
+  const pool=relics.filter(r=>!r.core&&relicRank(this.inventory,r.id)<r.maxRank).map(r=>({r,n:this.rand()})).sort((a,b)=>a.n-b.n).map(x=>x.r),offers:Relic[]=[];
+  const take=(match:(r:Relic)=>boolean)=>{let i=pool.findIndex(r=>match(r)&&!avoid.includes(r.id));if(i<0)i=pool.findIndex(match);if(i<0)return;offers.push(pool.splice(i,1)[0]);};
+  if(this.growth.path)take(r=>r.path===this.growth.path);
+  take(r=>!!r.path&&r.path!==this.growth.path);
+  if(this.rand()<.65)take(r=>!r.path);else take(()=>true);
+  while(offers.length<3&&pool.length)take(()=>true);
+  return offers;
+ }
+ reroll(){if(this.phase!=='reward'||this.growth.drafting||this.growth.rerolls<=0)return false;const previous=this.choices.map(r=>r.id);this.choices=this.offerRelics(previous);this.growth.rerolls--;this.eventQueue.push('select');return true;}
+
+ choose(id:string){if(this.phase!=='reward'||!this.choices.some(r=>r.id===id)||!this.applyRelic(id))return;if(this.growth.drafting){this.growth.drafting=false;this.choices=[];this.enterRoom('battle');this.eventQueue.push('select');return;}this.room++;if(this.room%3===2){this.routes=['battle'];}else this.routes=this.rand()<.5?['battle','elite']:['spring','elite'];this.phase='route';this.eventQueue.push('select');}
+ applyRelic(id:string){const relic=relics.find(r=>r.id===id);if(!relic||relicRank(this.inventory,id)>=relic.maxRank||(relic.core&&this.inventory.some(owned=>relics.find(r=>r.id===owned)?.core)))return false;const before=relic.path?builds.level(this,relic.path):0;this.inventory.push(id);if(relic.core&&relic.path)this.growth.path=relic.path;const s=this.stats;switch(id){case'power':s.damage*=1.25;break;case'haste':s.rate*=.84;s.skillCd*=.88;break;case'health':s.maxHp+=25;this.players.forEach(p=>p.maxHp+=25);this.healAll(30);break;case'chain':s.chain*=1.5;s.linkRange+=45;break;case'nova':s.nova*=1.4;s.roomCharge+=15;break;case'speed':s.speed*=1.12;s.dashCd*=.82;break;case'pierce':s.pierce++;s.damage*=1.08;break;case'multishot':s.shots=Math.min(6,s.shots+1);break;case'leech':s.leech++;break;case'armor':s.armor*=.82;break;case'revive':s.revive*=1.6;s.reviveHp=.65;break;case'charge':s.chargeRate*=1.35;s.healUlt+=10;break;case'frost':s.frost++;break;case'orbit':s.orbit++;break;case'dash':s.dashDamage+=45;break;case'close':s.close++;break;case'skill':s.skill*=1.45;s.skillCd*=.85;break;case'magnet':s.magnet+=90;break;}if(relic.path){const after=builds.level(this,relic.path);if((before<3&&after>=3)||(before<5&&after>=5)){this.notify(`${after} 阶流派联动已激活`);this.eventQueue.push('upgrade');}}return true;}
 }

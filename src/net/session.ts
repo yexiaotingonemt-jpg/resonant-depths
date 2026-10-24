@@ -77,7 +77,7 @@ export class OnlineSession {
  private disconnected(){this.connected=false;this.guestInput=idle();this.authority.remote=idle();if(this.world.phase==='playing')this.world.togglePause();this.update('disconnected',this.isHost?'搭档连接中断，远征已暂停。等待原搭档重新连接。':'与房主连接中断，远征已暂停。请尝试重新连接。');}
  private checkConnection(){if(!this.active||!this.connected)return;const now=Date.now();if(now-this.lastSeen>8000){const c=this.connection;this.connection=null;c?.close();this.disconnected();return;}if(now-this.lastPing>900){this.lastPing=now;this.send({type:'ping',at:now});}}
  ready(){if(!this.connected||this.started)return;if(!this.isHost)this.send({type:'ready',ready:!this.guestReady});}
- start(difficulty:string){if(!this.canStart)return;this.authority.start(crypto.getRandomValues(new Uint32Array(1))[0],difficulty);this.run=this.authority.run;this.started=true;this.update('playing');this.sendState();}
+ start(difficulty:string){if(!this.canStart)return;this.authority.start(crypto.getRandomValues(new Uint32Array(1))[0],difficulty,true);this.run=this.authority.run;this.started=true;this.update('playing');this.sendState();}
  command(kind:Command['kind'],value?:string){if(!this.connected||!this.started)return false;const command:Command={kind,value,epoch:this.isHost?this.authority.epoch:this.epoch};if(this.isHost){const applied=this.applyCommand(command);if(applied)this.sendState();return applied;}this.send({type:'command',command});return true;}
  private applyCommand(command:Command,guest=false){if(!command||typeof command!=='object'||!this.connected)return false;const applied=this.authority.command(command,guest);if(applied){this.run=this.authority.run;if(command.kind==='lobby'){this.started=false;this.guestReady=false;this.update('lobby');}this.changed();}return applied;}
  pause(){if(this.world.phase==='playing')this.command('pause');}
@@ -85,12 +85,12 @@ export class OnlineSession {
  private sendState(){if(!this.isHost||!this.connected)return;this.send({type:'state',version:PROTOCOL,seq:++this.stateSeq,run:this.authority.run,epoch:this.authority.epoch,world:capture(this.world),events:this.authority.takeEvents()});}
  private receiveState(data:StateMessage){
   if(data.version!==PROTOCOL||!Number.isSafeInteger(data.seq)||data.seq<=this.receivedSeq||!validSnapshot(data.world))return;
-  this.receivedSeq=data.seq;const previousPhase=this.world.phase,newRun=data.run!==this.run;this.run=data.run;this.epoch=data.epoch;
+  this.receivedSeq=data.seq;const previousPhase=this.world.phase,previousOffer=this.world.growth.offerRevision,newRun=data.run!==this.run;this.run=data.run;this.epoch=data.epoch;
   const oldPlayers=this.world.players,oldEnemies=this.world.enemies,oldBullets=this.world.bullets;
   Object.assign(this.world,data.world);this.world.eventQueue.push(...(Array.isArray(data.events)?data.events.filter(e=>typeof e==='string').slice(0,100):[]));
   this.target=JSON.parse(JSON.stringify(data.world));
   if(!newRun&&previousPhase===data.world.phase){this.world.players.forEach((p,i)=>{if(oldPlayers[i]&&Math.hypot(p.x-oldPlayers[i].x,p.y-oldPlayers[i].y)<180){p.x=oldPlayers[i].x;p.y=oldPlayers[i].y;}});const enemies=new Map(oldEnemies.map(e=>[e.id,e]));this.world.enemies.forEach(e=>{const old=enemies.get(e.id);if(old){e.x=old.x;e.y=old.y;}});const bullets=new Map(oldBullets.map(b=>[b.id,b]));this.world.bullets.forEach(b=>{const old=bullets.get(b.id);if(old&&Math.hypot(old.x-b.x,old.y-b.y)<40){b.x=old.x;b.y=old.y;}});}
-  this.started=this.world.phase!=='menu';const status=this.started?'playing':'lobby';if(this.status!==status||newRun||previousPhase!==this.world.phase){this.status=status;this.changed();}
+  this.started=this.world.phase!=='menu';const status=this.started?'playing':'lobby';if(this.status!==status||newRun||previousPhase!==this.world.phase||previousOffer!==this.world.growth.offerRevision){this.status=status;this.changed();}
  }
  tick(dt:number,actions:Action[]){
   if(!this.active){this.world.update(dt,actions);return;}

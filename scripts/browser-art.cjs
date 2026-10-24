@@ -13,7 +13,7 @@ const base=process.env.RESONANT_TEST_URL||'http://127.0.0.1:5178/';
   await page.waitForFunction(()=>window.resonant?.scene.actors.views.size===2);
   assert.equal(await page.locator('[data-action="start"]').isEnabled(),true);assert.equal(await page.locator('.asset-loading').count(),0);
   await page.screenshot({path:path.join(__dirname,'../preview.jpg'),quality:90});
-  await page.locator('[data-mode="duo"]').click();await page.locator('[data-action="start"]').click();
+  await page.locator('[data-mode="duo"]').click();await page.locator('[data-action="start"]').click();await page.locator('[data-relic]').first().click();
   await page.evaluate(()=>{const w=window.resonant.world;w.enemies=[];w.spawnTimer=100;});
   const dirs=[['a'],['a','w'],['w'],['w','d'],['d'],['d','s'],['s'],['s','a']];
   for(let i=0;i<dirs.length;i++){

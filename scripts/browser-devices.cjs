@@ -17,7 +17,7 @@ const http=require('node:http');
    await frame.waitForSelector('[data-action="start"]');
    const policy=await frame.evaluate(()=>{try{navigator.getGamepads();return'allowed';}catch(e){return e.name;}});
    if(scenario==='restricted')assert.equal(policy,'SecurityError');else assert.equal(policy,'allowed');
-   await frame.locator('[data-action="start"]').click();await page.waitForTimeout(200);
+   await frame.locator('[data-action="start"]').click();await frame.locator('[data-relic]').first().click();await page.waitForTimeout(200);
    const snapshot=()=>frame.evaluate(()=>{const w=window.resonant.world;return{phase:w.phase,time:w.time,x:w.players[0].x,ai:{x:w.players[1].x,y:w.players[1].y}};});
    const before=await snapshot();await page.keyboard.down('d');await page.waitForTimeout(750);await page.keyboard.up('d');const after=await snapshot();
    assert.equal(after.phase,'playing');assert.ok(after.time>before.time+.4,JSON.stringify({scenario,before,after}));assert.ok(after.x>before.x+80);assert.notDeepEqual(after.ai,before.ai);
